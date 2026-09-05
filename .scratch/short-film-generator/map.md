@@ -14,7 +14,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 
 ## Decisions so far
 
-<!-- index only; detail lives on closed tickets -->
+- [09 — In-browser Assembly without MP4 export](./issues/09-in-browser-assembly-research.md): Web Audio master clock + rAF still cuts (+ muted `playsinline` video for optional Clips); user-gesture gated; no MP4 encode for V1 playback. Write-up: [`docs/research/in-browser-assembly.md`](../../docs/research/in-browser-assembly.md).
 
 ## Not yet specified
 
