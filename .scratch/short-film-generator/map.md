@@ -1,0 +1,33 @@
+# Short film generator — wayfinder map
+
+## Destination
+
+A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where a Brief (free text + optional controls) produces a Film Plan via OpenRouter, generates Stills + Voiceover (Clips optional / off by default), Assembles a ~15–30s Film in an in-browser Timeline Player, and saves Projects locally.
+
+## Notes
+
+- Domain: Blinkai short-film generation. Read `CONTEXT.md` before naming anything. Use `/grilling` + `/domain-modeling` on grilling tickets; `/prototype` on prototype tickets; `/research` on research tickets.
+- Stack intent (not locked): TypeScript, Bun, OpenRouter.
+- **Plan, don't do.** This map produces decisions, not product code. After the map clears: `/to-spec` → `/to-tickets` → `/implement`.
+- Standing research: [OpenRouter media capabilities](../../docs/research/openrouter-media-capabilities.md) (LLM, images, async video, TTS confirmed 2026-09-05).
+- Charting preferences already locked into Destination (not separate tickets): to-spec handoff; solo tool; 15–30s target; Brief = free text + optional controls; Timeline Player (no V1 MP4); local Project save; Stills+Voiceover default, Clips optional/off.
+
+## Decisions so far
+
+<!-- index only; detail lives on closed tickets -->
+
+## Not yet specified
+
+- Spend / cost caps and user-visible OpenRouter usage during a Run
+- Failure UX when image or TTS generation fails mid-Run (partial Assembly?)
+- Character consistency across Stills (seed / reference image strategy)
+- Whether Voiceover is one continuous narration vs per-shot lines
+- Licensing / content-policy posture for generated media
+
+## Out of scope
+
+- Multi-user accounts, auth, billing, or shared cloud Projects
+- V1 mandatory Clips on every shot
+- V1 MP4 / file download export (Timeline Player is the Film surface)
+- Target runtime above ~30s for the first shippable cut
+- Non-OpenRouter media providers (unless a later ticket reopens Destination)
