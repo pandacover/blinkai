@@ -1,7 +1,7 @@
 # 01 — Brief optional controls for V1
 
 Type: grilling
-Status: open
+Status: claimed
 
 ## Question
 
