@@ -1,7 +1,7 @@
 # 10 — Provision OpenRouter API key for local dev
 
 Type: task
-Status: open
+Status: claimed
 Blocked by: 02
 
 ## Question
@@ -19,3 +19,11 @@ Checklist for the human (or agent where possible):
 ## Answer
 
 _(fill on resolve: where the key landed, how to rotate it, any `.env.example` fields added—without committing secrets)_
+
+## Comments
+
+- Claimed by wayfinder session (ticket 10). AFK progress:
+  - [x] `.env.example` at app root documents empty `OPENROUTER_API_KEY=` (and optional `BLINKAI_DATA_DIR`).
+  - [x] `.gitignore` already ignores `.env` / `.env.*` while allowing `.env.example`.
+  - [x] Throwaway Bun check `scripts/check-openrouter-env.ts` hard-fails with a clear `.env` / `.env.example` message when the key is missing or blank (product Hono server still deferred to `/implement` per map Notes).
+  - [ ] **HITL remaining:** create a key at https://openrouter.ai/keys, put `OPENROUTER_API_KEY=...` in gitignored app-root `.env`, then reply so this ticket can be resolved (never paste the secret into chat or commit it).
