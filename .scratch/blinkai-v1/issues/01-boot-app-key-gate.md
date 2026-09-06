@@ -4,10 +4,14 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Single-package Bun + Hono API and Vite/React SPA boot per ADR 0001
-- [ ] Missing/invalid `OPENROUTER_API_KEY` hard-fails before serving Runs, with `.env` guidance
-- [ ] Valid key allows the SPA to load and talk to a basic API readiness endpoint
-- [ ] `.env.example` documents `OPENROUTER_API_KEY` and optional `BLINKAI_DATA_DIR`
-- [ ] Run API seam test (or equivalent boot test) covers the key hard-fail / ready paths
+- [x] Single-package Bun + Hono API and Vite/React SPA boot per ADR 0001
+- [x] Missing/invalid `OPENROUTER_API_KEY` hard-fails before serving Runs, with `.env` guidance
+- [x] Valid key allows the SPA to load and talk to a basic API readiness endpoint
+- [x] `.env.example` documents `OPENROUTER_API_KEY` and optional `BLINKAI_DATA_DIR`
+- [x] Run API seam test (or equivalent boot test) covers the key hard-fail / ready paths
+
+## Comments
+
+- 2026-09-06: Implemented on branch `cursor/implement-01-boot-key-gate-2210`. Seam tests in `src/server/{env,app,boot}.test.ts`. SPA shell at `src/client/` talks to `GET /api/ready`. Shared Brief/Film Plan stubs in `src/shared/`.

@@ -1,0 +1,90 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,500;0,9..40,700;1,9..40,500&family=Space+Grotesk:wght@500;700&display=swap");
+
+:root {
+  color-scheme: light;
+  --ink: #10231f;
+  --muted: #3f5a53;
+  --accent: #0a7a66;
+  --danger: #9f2d2d;
+  --grid: rgba(16, 35, 31, 0.08);
+  --sky: linear-gradient(145deg, #e8f6f1 0%, #cfe8e0 42%, #b9d8ef 100%);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  color: var(--ink);
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--sky);
+  background-color: #d5ebe4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+code {
+  font-family: "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.92em;
+}
+
+.shell {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 3rem;
+}
+
+.shell__brand {
+  margin: 0 0 0.85rem;
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: clamp(2.6rem, 7vw, 3.8rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+  animation: rise 700ms ease-out both;
+}
+
+.shell__title {
+  margin: 0 0 0.75rem;
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  font-weight: 500;
+  animation: rise 700ms ease-out 80ms both;
+}
+
+.shell__lede,
+.shell__status p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.shell__lede {
+  animation: rise 700ms ease-out 140ms both;
+}
+
+.shell__status {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(16, 35, 31, 0.12);
+  animation: rise 700ms ease-out 220ms both;
+}
+
+.shell__error {
+  color: var(--danger);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
