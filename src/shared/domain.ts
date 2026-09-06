@@ -43,3 +43,20 @@ export type ProjectMeta = {
   createdAt: string;
   updatedAt: string;
 };
+
+/** Playable beat timing for the Timeline Player (filled in later tickets). */
+export type AssemblyBeat = {
+  shotId: ShotId;
+  startSeconds: number;
+  durationSeconds: number;
+  stillAssetPath?: string;
+  voiceoverAssetPath?: string;
+  clipAssetPath?: string;
+};
+
+/** Manifest that combines Shots/assets into one Film for the Timeline Player. */
+export type Assembly = {
+  aspectRatio: AspectRatio;
+  totalDurationSeconds: number;
+  beats: AssemblyBeat[];
+};

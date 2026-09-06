@@ -15,12 +15,6 @@ import {
   type ProjectStore,
 } from "./project-store";
 
-export type AppEnv = {
-  Variables: {
-    config: ServerConfig;
-  };
-};
-
 export type CreateAppOptions = {
   /** Absolute path to Vite build output; enables SPA static serving when present. */
   staticDir?: string;
@@ -31,15 +25,10 @@ export type CreateAppOptions = {
 export function createApp(
   config: ServerConfig,
   options: CreateAppOptions = {},
-): Hono<AppEnv> {
-  const app = new Hono<AppEnv>();
+): Hono {
+  const app = new Hono();
   const openRouter = options.openRouter ?? createFakeOpenRouterPort();
   const store = options.store ?? createProjectStore(config.dataDir);
-
-  app.use("*", async (c, next) => {
-    c.set("config", config);
-    await next();
-  });
 
   app.get("/api/ready", (c) =>
     c.json({

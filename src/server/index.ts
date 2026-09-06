@@ -1,19 +1,9 @@
 import { resolve } from "node:path";
 import { createApp } from "./app";
-import { OpenRouterKeyError, loadServerConfig } from "./env";
+import { exitOnBootFailure } from "./boot";
+import { loadServerConfig } from "./env";
 
 const appRoot = resolve(import.meta.dir, "../..");
-
-function printBootFailure(error: unknown): never {
-  if (error instanceof OpenRouterKeyError) {
-    console.error(error.message);
-  } else if (error instanceof Error) {
-    console.error(`Blinkai failed to start: ${error.message}`);
-  } else {
-    console.error("Blinkai failed to start.");
-  }
-  process.exit(1);
-}
 
 let config;
 try {
@@ -21,7 +11,7 @@ try {
     appRoot,
   });
 } catch (error) {
-  printBootFailure(error);
+  exitOnBootFailure(error);
 }
 
 const staticDir = resolve(appRoot, "dist");

@@ -5,7 +5,8 @@
  */
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
-import { loadServerConfig, OpenRouterKeyError } from "../src/server/env";
+import { exitOnBootFailure } from "../src/server/boot";
+import { loadServerConfig } from "../src/server/env";
 
 const appRoot = resolve(import.meta.dir, "..");
 
@@ -14,12 +15,7 @@ try {
     appRoot,
   });
 } catch (error) {
-  if (error instanceof OpenRouterKeyError) {
-    console.error(error.message);
-  } else if (error instanceof Error) {
-    console.error(error.message);
-  }
-  process.exit(1);
+  exitOnBootFailure(error);
 }
 
 const children = [
