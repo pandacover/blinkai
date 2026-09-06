@@ -1,7 +1,7 @@
 # 07 — Clip behavior when Include Clips is on
 
 Type: grilling
-Status: open
+Status: claimed
 
 ## Question
 
