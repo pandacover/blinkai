@@ -1,7 +1,7 @@
 # 06 — Default OpenRouter model roster
 
 Type: grilling
-Status: open
+Status: claimed
 
 ## Question
 
