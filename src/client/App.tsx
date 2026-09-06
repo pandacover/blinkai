@@ -72,9 +72,10 @@ function stageFromStatus(status: ProjectStatus): RunStage {
   }
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
+type RunStreamEvent =
+  | { type: "status"; status: ProjectStatus; projectId?: ProjectId }
+  | { type: "done"; project: ProjectView }
+  | { type: "error"; message: string };
 
 export function App() {
   const [status, setStatus] = useState<ApiStatus>({ kind: "loading" });
@@ -147,32 +148,48 @@ export function App() {
   }, [runStage]);
 
   /**
-   * Bounded progress watch: maps Project.status → stepper, stops on ready/failed/timeout.
-   * Must never spin forever (regression: unbounded Project status GET loops).
+   * Stream Run progress over one POST (NDJSON). No GET /api/projects/:id loop —
+   * that looked infinite while Stills were slow/hung.
    */
-  async function watchRunProgress(projectId: ProjectId): Promise<ProjectView> {
-    const started = Date.now();
-    const timeoutMs = 120_000;
-    const intervalMs = 400;
-    while (Date.now() - started < timeoutMs) {
-      const response = await fetch(`/api/projects/${projectId}`);
-      const body = await response.json();
-      if (!response.ok) {
-        throw new Error(body.message ?? "Could not read Run progress");
-      }
-      const next = body.project as ProjectView;
-      setProject(next);
-      setRenameValue(next.displayTitle);
-      if (next.status === "failed") {
-        throw new Error("Run failed while generating media");
-      }
-      setRunStage(stageFromStatus(next.status));
-      if (next.status === "ready" && next.assembly) {
-        return next;
-      }
-      await sleep(intervalMs);
+  async function consumeRunStream(response: Response): Promise<ProjectView> {
+    if (!response.body) {
+      throw new Error("Run stream unavailable");
     }
-    throw new Error("Timed out waiting for Assembly — check server logs");
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finished: ProjectView | null = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const event = JSON.parse(trimmed) as RunStreamEvent;
+        if (event.type === "status") {
+          setRunStage(stageFromStatus(event.status));
+          continue;
+        }
+        if (event.type === "error") {
+          throw new Error(event.message || "Run failed while generating media");
+        }
+        if (event.type === "done") {
+          finished = event.project;
+          setProject(event.project);
+          setRenameValue(event.project.displayTitle);
+          setRunStage("ready");
+        }
+      }
+    }
+
+    if (!finished || finished.status !== "ready" || !finished.assembly) {
+      throw new Error("Run stream ended without Assembly");
+    }
+    return finished;
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -181,26 +198,23 @@ export function App() {
     setSubmitting(true);
     setRunStage("planning");
     try {
-      // async=1: return after Film Plan so the UI can show live status steps.
-      const response = await fetch("/api/runs?async=1", {
+      // stream=1: server pushes status lines; client never polls Project GETs.
+      const response = await fetch("/api/runs?stream=1", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(form),
       });
-      const body = await response.json();
+      const contentType = response.headers.get("content-type") ?? "";
       if (!response.ok) {
-        throw new Error(body.message ?? "Could not start Run");
+        const body = await response.json().catch(() => ({}));
+        throw new Error(
+          (body as { message?: string }).message ?? "Could not start Run",
+        );
       }
-      const started = body.project as ProjectView;
-      setProject(started);
-      setRenameValue(started.displayTitle);
-      setRunStage(stageFromStatus(started.status));
-      if (started.status === "ready" && started.assembly) {
-        setView("player");
-        await refreshLibrary();
-        return;
+      if (!contentType.includes("ndjson")) {
+        throw new Error("Run stream response was not NDJSON");
       }
-      const finished = await watchRunProgress(started.id);
+      const finished = await consumeRunStream(response);
       setProject(finished);
       setRenameValue(finished.displayTitle);
       setRunStage("ready");

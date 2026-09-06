@@ -41,10 +41,73 @@ export function createApp(
   app.post("/api/runs", async (c) => {
     try {
       const brief = parseBrief(await c.req.json());
-      // Default: wait for Assembly (sync). Opt into background with ?async=1.
-      // ?wait=1 remains supported for older clients.
+      // stream=1: NDJSON status events + final project (no client Project GET poll).
+      // async=1: background 202 (legacy). Default / wait=1: sync JSON 201.
+      const streamRun = c.req.query("stream") === "1";
       const asyncRun =
-        c.req.query("async") === "1" && c.req.query("wait") !== "1";
+        !streamRun &&
+        c.req.query("async") === "1" &&
+        c.req.query("wait") !== "1";
+
+      if (streamRun) {
+        const encoder = new TextEncoder();
+        const body = new ReadableStream<Uint8Array>({
+          start: async (controller) => {
+            let projectId: `prj_${string}` | undefined;
+            const send = (event: Record<string, unknown>) => {
+              controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+            };
+            try {
+              send({ type: "status", status: "planning" });
+              const filmPlan = await openRouter.planFilm({ brief });
+              let project = await store.createProject({
+                brief,
+                filmPlan,
+                status: "planning",
+              });
+              projectId = project.id;
+              send({
+                type: "status",
+                status: "planning",
+                projectId: project.id,
+              });
+              project = await runMediaPipeline({
+                project,
+                filmPlan,
+                openRouter,
+                store,
+                onStatus: (status) => send({ type: "status", status }),
+              });
+              send({ type: "done", project });
+            } catch (error) {
+              const message =
+                error instanceof Error
+                  ? error.message
+                  : "Run failed while generating media";
+              if (projectId) {
+                try {
+                  await store.updateProject(projectId, { status: "failed" });
+                } catch {
+                  // Best-effort: stream already failed.
+                }
+              }
+              send({ type: "error", message });
+            } finally {
+              controller.close();
+            }
+          },
+        });
+        return new Response(body, {
+          status: 200,
+          headers: {
+            "content-type": "application/x-ndjson; charset=utf-8",
+            "cache-control": "no-cache",
+            // Discourage proxies from buffering progress lines.
+            "x-accel-buffering": "no",
+          },
+        });
+      }
+
       const filmPlan = await openRouter.planFilm({ brief });
       // Autosave after Film Plan (async clients may poll status from here).
       let project = await store.createProject({

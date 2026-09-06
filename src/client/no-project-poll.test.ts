@@ -3,27 +3,31 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Progress watching is allowed, but must be bounded.
- * Regression: unbounded pollUntilReady at App.tsx:115 spammed GET /api/projects/:id.
+ * Regression: unbounded pollUntilReady / watchRunProgress spammed GET /api/projects/:id
+ * while Stills were in flight (looked like an infinite DevTools loop).
+ * Progress must come from the Run NDJSON stream — never a Project GET poll loop.
  */
 describe("client Run progress watching", () => {
   const source = readFileSync(join(import.meta.dir, "App.tsx"), "utf8");
 
-  test("does not define an unbounded poll helper by the old name", () => {
-    // Allow mentions in comments only if needed; forbid a live helper identifier.
+  test("does not define poll helpers that GET Project status in a loop", () => {
     expect(source).not.toMatch(/async function pollUntilReady\b/);
     expect(source).not.toMatch(/function pollUntilReady\b/);
+    expect(source).not.toMatch(/async function watchRunProgress\b/);
+    expect(source).not.toMatch(/function watchRunProgress\b/);
   });
 
-  test("starts Runs in async mode so status steps can update live", () => {
-    expect(source).toContain("/api/runs?async=1");
+  test("starts Runs in stream mode (no async Project GET poll)", () => {
+    expect(source).toContain("/api/runs?stream=1");
+    expect(source).not.toContain("/api/runs?async=1");
   });
 
-  test("progress watch stops on ready, failed, and timeout", () => {
-    expect(source).toContain("watchRunProgress");
-    expect(source).toMatch(/status === "ready"/);
-    expect(source).toMatch(/status === "failed"/);
-    expect(source).toMatch(/timeoutMs\s*=\s*120_000/);
+  test("consumes NDJSON status events from the Run stream", () => {
+    expect(source).toContain("consumeRunStream");
+    expect(source).toContain('includes("ndjson")');
+    expect(source).toContain('type === "status"');
+    expect(source).toContain('type === "done"');
+    expect(source).toContain('type === "error"');
   });
 
   test("renders a Run progress stepper", () => {

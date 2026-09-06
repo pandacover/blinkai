@@ -1,4 +1,10 @@
-import type { Assembly, AssemblyBeat, ClipFit, FilmPlan } from "../shared";
+import type {
+  Assembly,
+  AssemblyBeat,
+  ClipFit,
+  FilmPlan,
+  ProjectStatus,
+} from "../shared";
 import { shortestClipDurationSeconds } from "./clip-duration";
 import type { ProjectRecord, ProjectStore } from "./project-store";
 import type { OpenRouterPort } from "./openrouter";
@@ -35,12 +41,23 @@ export async function runMediaPipeline(input: {
   store: ProjectStore;
   /** When false, skip Clip generation even if prompts exist. */
   generateClips?: boolean;
+  /** Fired after each persisted status change (for streamed Run progress). */
+  onStatus?: (status: ProjectStatus) => void;
 }): Promise<ProjectRecord> {
-  const { filmPlan, openRouter, store } = input;
+  const { filmPlan, openRouter, store, onStatus } = input;
   let project = input.project;
   const generateClips = input.generateClips ?? filmPlan.includeClips;
 
-  project = await store.updateProject(project.id, { status: "stills" });
+  async function setStatus(
+    status: ProjectStatus,
+    patch: Parameters<ProjectStore["updateProject"]>[1] = {},
+  ) {
+    project = await store.updateProject(project.id, { ...patch, status });
+    onStatus?.(status);
+    return project;
+  }
+
+  await setStatus("stills");
 
   const stillPaths = new Map<string, string>();
   for (const shot of filmPlan.shots) {
@@ -51,7 +68,7 @@ export async function runMediaPipeline(input: {
     stillPaths.set(shot.id, relativePath);
   }
 
-  project = await store.updateProject(project.id, { status: "voiceover" });
+  await setStatus("voiceover");
 
   const voiceoverPaths = new Map<string, string>();
   const voiceoverDurations = new Map<string, number>();
@@ -77,7 +94,7 @@ export async function runMediaPipeline(input: {
   const clipSourceDurations = new Map<string, number>();
   const clipFailed = new Set<string>();
   if (generateClips) {
-    project = await store.updateProject(project.id, { status: "clips" });
+    await setStatus("clips");
     for (const shot of filmPlan.shots) {
       if (!shot.clipPrompt || !openRouter.generateClip) continue;
       const soft = shot.durationSeconds ?? 4;
@@ -133,10 +150,7 @@ export async function runMediaPipeline(input: {
     beats,
   };
 
-  project = await store.updateProject(project.id, {
-    status: "ready",
-    assembly,
-  });
+  await setStatus("ready", { assembly });
 
   return project;
 }
