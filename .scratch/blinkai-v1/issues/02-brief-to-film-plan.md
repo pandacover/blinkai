@@ -4,12 +4,16 @@
 
 **Blocked by:** 01 — Boot app with OpenRouter key gate
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Brief form enforces required Idea and V1 controls/defaults from the spec
-- [ ] Blank Mood / Visual Style are omitted from planning inputs
-- [ ] POST/create Run via the Run API produces a Film Plan through the fake OpenRouter port
-- [ ] Project is saved under `BLINKAI_DATA_DIR` with opaque `prj_<ulid>` id and Brief + Film Plan on disk
-- [ ] UI shows the Film Plan for the new Project/Run
-- [ ] Include Clips off yields no `clipPrompt` on Shots; on allows optional per-Shot `clipPrompt` in the fake Plan
-- [ ] Run API tests cover Brief → persisted Film Plan Project with the fake port
+- [x] Brief form enforces required Idea and V1 controls/defaults from the spec
+- [x] Blank Mood / Visual Style are omitted from planning inputs
+- [x] POST/create Run via the Run API produces a Film Plan through the fake OpenRouter port
+- [x] Project is saved under `BLINKAI_DATA_DIR` with opaque `prj_<ulid>` id and Brief + Film Plan on disk
+- [x] UI shows the Film Plan for the new Project/Run
+- [x] Include Clips off yields no `clipPrompt` on Shots; on allows optional per-Shot `clipPrompt` in the fake Plan
+- [x] Run API tests cover Brief → persisted Film Plan Project with the fake port
+
+## Comments
+
+- 2026-09-06: Implemented with injectable `OpenRouterPort`, filesystem `ProjectStore`, `POST /api/runs`, Brief form + Film Plan view. Fake port used until ticket 07.

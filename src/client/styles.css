@@ -6,6 +6,7 @@
   --muted: #3f5a53;
   --accent: #0a7a66;
   --danger: #9f2d2d;
+  --line: rgba(16, 35, 31, 0.12);
   --grid: rgba(16, 35, 31, 0.08);
   --sky: linear-gradient(145deg, #e8f6f1 0%, #cfe8e0 42%, #b9d8ef 100%);
   font-family: "DM Sans", "Segoe UI", sans-serif;
@@ -33,9 +34,9 @@ code {
 }
 
 .shell {
-  max-width: 40rem;
+  max-width: 42rem;
   margin: 0 auto;
-  padding: 4.5rem 1.5rem 3rem;
+  padding: 3.5rem 1.5rem 4rem;
 }
 
 .shell__brand {
@@ -68,14 +69,117 @@ code {
 }
 
 .shell__status {
-  margin-top: 2rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgba(16, 35, 31, 0.12);
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
   animation: rise 700ms ease-out 220ms both;
 }
 
 .shell__error {
   color: var(--danger);
+}
+
+.brief {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  animation: rise 700ms ease-out 280ms both;
+}
+
+.brief__row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.brief__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.brief__field span,
+.brief__check span {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.brief__field textarea,
+.brief__field input,
+.brief__field select {
+  width: 100%;
+  border: 1px solid rgba(16, 35, 31, 0.18);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  border-radius: 0;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+}
+
+.brief__field textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.brief__check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.brief__submit {
+  justify-self: start;
+  border: 0;
+  background: var(--accent);
+  color: #f4fffb;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.75rem 1.2rem;
+  cursor: pointer;
+}
+
+.brief__submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.plan {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  animation: rise 500ms ease-out both;
+}
+
+.plan__title {
+  margin: 0 0 0.4rem;
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: 1.6rem;
+}
+
+.plan__logline,
+.plan__meta,
+.plan__shot p {
+  color: var(--muted);
+}
+
+.plan__shots {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+}
+
+.plan__shot {
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.plan__shot-id {
+  margin: 0 0 0.35rem;
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 @keyframes rise {
@@ -86,5 +190,11 @@ code {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .brief__row {
+    grid-template-columns: 1fr;
   }
 }
