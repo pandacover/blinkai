@@ -9,8 +9,16 @@ The assembled short audiovisual piece the user can watch at the end of a run.
 _Avoid_: movie, video (when meaning the finished piece), render
 
 **Film Plan**:
-The structured textual blueprint (story, shots, and media prompts) produced before media is generated.
+The structured textual blueprint produced before media is generated: title, logline, echoed Brief controls, and an ordered list of Shots.
 _Avoid_: script (alone), screenplay (alone), storyboard (alone)
+
+**Logline**:
+A one-sentence summary of the Film on the Film Plan.
+_Avoid_: synopsis, tagline (when meaning the Film Plan summary)
+
+**Shot**:
+One ordered visual unit on the Film Plan: a Still prompt, optional Voiceover line, timing, and optional Clip prompt when Include Clips is on.
+_Avoid_: beat, scene (when meaning a single visual unit)
 
 **Brief**:
 The user's starting input that kicks off a run: a required Idea plus optional controls.
