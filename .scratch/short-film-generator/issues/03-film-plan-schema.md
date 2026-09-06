@@ -34,4 +34,4 @@ No schema-enforced shot-count min/max; planner uses soft guidance (~4–6 for 15
 
 Voiceover is **per-shot** (not one continuous narration).
 
-Example: [film-plan.example.json](../assets/film-plan.example.json)
+Example: [film-plan.example.json](../assets/film-plan.example.json) (clips off). Mixed clips: [film-plan.include-clips.example.json](../assets/film-plan.include-clips.example.json).
