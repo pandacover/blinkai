@@ -109,40 +109,15 @@ export function App() {
     }
   }, [runStage]);
 
-  async function pollUntilReady(projectId: ProjectId) {
-    const started = Date.now();
-    while (Date.now() - started < 120_000) {
-      const response = await fetch(`/api/projects/${projectId}`);
-      const body = await response.json();
-      if (!response.ok) {
-        throw new Error(body.message ?? "Could not poll Project");
-      }
-      const next = body.project as ProjectView;
-      setProject(next);
-      setRenameValue(next.displayTitle);
-      if (next.status === "stills") setRunStage("stills");
-      else if (next.status === "voiceover") setRunStage("voiceover");
-      else if (next.status === "clips") setRunStage("clips");
-      else if (next.status === "ready") {
-        setRunStage("ready");
-        return next;
-      } else if (next.status === "failed") {
-        throw new Error("Run failed while generating media");
-      } else {
-        setRunStage("planning");
-      }
-      await new Promise((resolve) => window.setTimeout(resolve, 200));
-    }
-    throw new Error("Timed out waiting for Assembly");
-  }
-
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
     setSubmitting(true);
     setRunStage("planning");
     try {
-      const response = await fetch("/api/runs", {
+      // wait=1: server runs Film Plan + media to completion — no client poll loop.
+      setRunStage("stills");
+      const response = await fetch("/api/runs?wait=1", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(form),
@@ -151,14 +126,15 @@ export function App() {
       if (!response.ok) {
         throw new Error(body.message ?? "Could not start Run");
       }
-      const started = body.project as ProjectView;
-      setProject(started);
-      setRenameValue(started.displayTitle);
-      if (started.status === "ready" && started.assembly) {
-        setRunStage("ready");
-      } else {
-        await pollUntilReady(started.id);
+      const finished = body.project as ProjectView;
+      if (finished.status !== "ready" || !finished.assembly) {
+        throw new Error(
+          `Run finished without Assembly (status=${finished.status}). Check server logs.`,
+        );
       }
+      setProject(finished);
+      setRenameValue(finished.displayTitle);
+      setRunStage("ready");
       setView("player");
       await refreshLibrary();
     } catch (error) {

@@ -64,22 +64,37 @@ export function createLiveOpenRouterPort(
   async function openRouter(
     path: string,
     init: RequestInit,
+    timeoutMs = 60_000,
   ): Promise<Response> {
-    const response = await fetchImpl(`${baseUrl}${path}`, {
-      ...init,
-      headers: {
-        authorization: `Bearer ${options.apiKey}`,
-        "content-type": "application/json",
-        ...(init.headers ?? {}),
-      },
-    });
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(
-        `OpenRouter ${path} failed (${response.status}). Check OPENROUTER_API_KEY and model access. ${detail.slice(0, 400)}`,
-      );
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetchImpl(`${baseUrl}${path}`, {
+        ...init,
+        signal: controller.signal,
+        headers: {
+          authorization: `Bearer ${options.apiKey}`,
+          "content-type": "application/json",
+          ...(init.headers ?? {}),
+        },
+      });
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(
+          `OpenRouter ${path} failed (${response.status}). Check OPENROUTER_API_KEY and model access. ${detail.slice(0, 400)}`,
+        );
+      }
+      return response;
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error(
+          `OpenRouter ${path} timed out after ${timeoutMs}ms. Check network/model availability, or unset BLINKAI_USE_LIVE_OPENROUTER to use the fake port.`,
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timer);
     }
-    return response;
   }
 
   return {
