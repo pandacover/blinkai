@@ -1,7 +1,7 @@
 # 08 — Bun and TypeScript app topology
 
 Type: grilling
-Status: open
+Status: claimed
 
 ## Question
 
