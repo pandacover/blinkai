@@ -23,6 +23,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 - [07 — Clip behavior when Include Clips is on](./issues/07-optional-clip-enablement.md): mix Clip/Still-only Shots; optional per-shot `clipPrompt`; always Still + muted Clip; audio-wins window; cut long Clips / hold last frame on short; no V1 per-shot override. Example: [`film-plan.include-clips.example.json`](./assets/film-plan.include-clips.example.json).
 - [08 — Bun and TypeScript app topology](./issues/08-bun-ts-app-topology.md): single package; Bun + Hono API; Vite/React/TS SPA; `src/{server,client,shared}`; OpenRouter server-side only. ADR: [`docs/adr/0001-bun-ts-app-topology.md`](../../docs/adr/0001-bun-ts-app-topology.md).
 - [09 — In-browser Assembly without MP4 export](./issues/09-in-browser-assembly-research.md): Web Audio master clock + rAF still cuts (+ muted `playsinline` video for optional Clips); user-gesture gated; no MP4 encode for V1 playback. Write-up: [`docs/research/in-browser-assembly.md`](../../docs/research/in-browser-assembly.md).
+- [10 — Provision OpenRouter API key for local dev](./issues/10-provision-openrouter-key.md): `.env.example` committed; real `OPENROUTER_API_KEY` in gitignored `.env`; rotate via OpenRouter keys page; Bun hard-fail check deferred until implement (no server yet).
 
 ## Not yet specified
 

@@ -1,7 +1,7 @@
 # 10 — Provision OpenRouter API key for local dev
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: 02
 
 ## Question
@@ -15,7 +15,9 @@ Checklist for the human (or agent where possible):
 3. Confirm the Bun server reads the var and hard-fails clearly when it is missing/invalid.
 4. Record in the Answer where the key lives and how to rotate it — never commit the secret.
 
-
 ## Answer
 
-_(fill on resolve: where the key landed, how to rotate it, any `.env.example` fields added—without committing secrets)_
+- **Where:** app-root gitignored `.env` with `OPENROUTER_API_KEY` set (non-empty; not committed; not in git history).
+- **Template:** committed `.env.example` documents `OPENROUTER_API_KEY=` and optional `BLINKAI_DATA_DIR=`.
+- **Rotate:** replace the value in `.env` (or revoke the key at https://openrouter.ai/keys and paste a new one). Never commit `.env`.
+- **Server hard-fail check:** deferred — no Bun/Hono app exists yet (map is still planning). Implement must hard-fail on missing/invalid key per [02](./02-openrouter-api-key.md) and [08](./08-bun-ts-app-topology.md).
