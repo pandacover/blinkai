@@ -86,7 +86,7 @@ describe("Run API: Film Plan → Stills + Voiceover Assembly", () => {
     const store = createProjectStore(config.dataDir);
     const app = createApp(config, { openRouter, store });
 
-    const response = await app.request("/api/runs", {
+    const response = await app.request("/api/runs?wait=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(baseBrief),

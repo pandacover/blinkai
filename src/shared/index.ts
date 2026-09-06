@@ -1,6 +1,7 @@
 export type {
   Assembly,
   AssemblyBeat,
+  ClipFit,
   AspectRatio,
   Brief,
   DurationTarget,

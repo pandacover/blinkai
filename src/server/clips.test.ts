@@ -91,7 +91,7 @@ describe("Run API: optional Clips", () => {
 
     const store = createProjectStore(config.dataDir);
     const app = createApp(config, { openRouter, store });
-    const response = await app.request("/api/runs", {
+    const response = await app.request("/api/runs?wait=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(brief),
@@ -103,6 +103,9 @@ describe("Run API: optional Clips", () => {
     expect(beats[1].clipAssetPath).toBeUndefined();
     expect(beats[2].clipAssetPath).toBeUndefined();
     expect(beats[2].clipFailed).toBe(true);
+    expect(beats[0].clipFit).toBe("cut");
+    expect(beats[0].clipSourceDurationSeconds).toBeGreaterThan(0);
+    expect(beats[2].clipFit).toBe("still-fallback");
     expect(beats[0].stillAssetPath).toBeTruthy();
     expect(beats[2].stillAssetPath).toBeTruthy();
 
@@ -165,7 +168,7 @@ describe("Run API: optional Clips", () => {
       openRouter,
       store: createProjectStore(config.dataDir),
     });
-    const response = await app.request("/api/runs", {
+    const response = await app.request("/api/runs?wait=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -180,4 +183,71 @@ describe("Run API: optional Clips", () => {
     expect(body.project.assembly.beats[0].clipAssetPath).toBeUndefined();
     expect(clipCalls).toBe(0);
   });
+
+
+  test("short Clip is marked hold against a longer audio-wins window", async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), "blinkai-hold-"));
+    const config = loadServerConfig({
+      OPENROUTER_API_KEY: "sk-or-test",
+      BLINKAI_DATA_DIR: dataDir,
+    });
+    const openRouter: OpenRouterPort = {
+      async planFilm() {
+        return {
+          title: "Hold",
+          logline: "Short clip long window",
+          durationTarget: "15s",
+          aspectRatio: "16:9",
+          includeClips: true,
+          shots: [
+            {
+              id: "shot_01",
+              stillPrompt: "Still",
+              voiceover: "This line is long enough to win the window.",
+              durationSeconds: 2,
+              clipPrompt: "tiny move",
+            },
+          ],
+        };
+      },
+      async generateStill() {
+        return { bytes: tinyPng, contentType: "image/png" };
+      },
+      async generateVoiceover() {
+        return {
+          bytes: new TextEncoder().encode("vo"),
+          contentType: "audio/wav",
+          durationSeconds: 6,
+        };
+      },
+      async generateClip() {
+        return {
+          bytes: new TextEncoder().encode("clip"),
+          contentType: "video/mp4",
+          durationSeconds: 4,
+        };
+      },
+    };
+    const app = createApp(config, {
+      openRouter,
+      store: createProjectStore(config.dataDir),
+    });
+    const response = await app.request("/api/runs?wait=1", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        idea: "Hold last frame",
+        durationTarget: "15s",
+        aspectRatio: "16:9",
+        includeClips: true,
+      }),
+    });
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    const beat = body.project.assembly.beats[0];
+    expect(beat.durationSeconds).toBe(6);
+    expect(beat.clipSourceDurationSeconds).toBe(4);
+    expect(beat.clipFit).toBe("hold");
+  });
+
 });

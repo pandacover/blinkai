@@ -27,7 +27,7 @@ describe("Project library API", () => {
       store,
     });
 
-    const created = await app.request("/api/runs", {
+    const created = await app.request("/api/runs?wait=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(brief),

@@ -109,13 +109,38 @@ export function App() {
     }
   }, [runStage]);
 
+  async function pollUntilReady(projectId: ProjectId) {
+    const started = Date.now();
+    while (Date.now() - started < 120_000) {
+      const response = await fetch(`/api/projects/${projectId}`);
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body.message ?? "Could not poll Project");
+      }
+      const next = body.project as ProjectView;
+      setProject(next);
+      setRenameValue(next.displayTitle);
+      if (next.status === "stills") setRunStage("stills");
+      else if (next.status === "voiceover") setRunStage("voiceover");
+      else if (next.status === "clips") setRunStage("clips");
+      else if (next.status === "ready") {
+        setRunStage("ready");
+        return next;
+      } else if (next.status === "failed") {
+        throw new Error("Run failed while generating media");
+      } else {
+        setRunStage("planning");
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 200));
+    }
+    throw new Error("Timed out waiting for Assembly");
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
     setSubmitting(true);
     setRunStage("planning");
-    const stageTimer = window.setTimeout(() => setRunStage("stills"), 200);
-    const stageTimer2 = window.setTimeout(() => setRunStage("voiceover"), 500);
     try {
       const response = await fetch("/api/runs", {
         method: "POST",
@@ -126,9 +151,14 @@ export function App() {
       if (!response.ok) {
         throw new Error(body.message ?? "Could not start Run");
       }
-      setRunStage("ready");
-      setProject(body.project as ProjectView);
-      setRenameValue((body.project as ProjectView).displayTitle);
+      const started = body.project as ProjectView;
+      setProject(started);
+      setRenameValue(started.displayTitle);
+      if (started.status === "ready" && started.assembly) {
+        setRunStage("ready");
+      } else {
+        await pollUntilReady(started.id);
+      }
       setView("player");
       await refreshLibrary();
     } catch (error) {
@@ -137,8 +167,6 @@ export function App() {
         error instanceof Error ? error.message : "Could not start Run",
       );
     } finally {
-      window.clearTimeout(stageTimer);
-      window.clearTimeout(stageTimer2);
       setSubmitting(false);
     }
   }

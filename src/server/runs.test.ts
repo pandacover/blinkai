@@ -74,7 +74,7 @@ describe("Run API: Brief → Film Plan Project", () => {
     const store = createProjectStore(config.dataDir);
     const app = createApp(config, { openRouter, store });
 
-    const response = await app.request("/api/runs", {
+    const response = await app.request("/api/runs?wait=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -140,7 +140,7 @@ describe("Run API: Brief → Film Plan Project", () => {
       store: createProjectStore(config.dataDir),
     });
 
-    const response = await app.request("/api/runs", {
+    const response = await app.request("/api/runs?wait=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ ...baseBrief, includeClips: true }),
@@ -175,7 +175,7 @@ describe("Run API: Brief → Film Plan Project", () => {
       store: createProjectStore(config.dataDir),
     });
 
-    const response = await app.request("/api/runs", {
+    const response = await app.request("/api/runs?wait=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ ...baseBrief, idea: "   " }),

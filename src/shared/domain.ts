@@ -53,6 +53,9 @@ export type ProjectMeta = {
   status: ProjectStatus;
 };
 
+/** How a Clip fits inside an audio-wins Shot window. */
+export type ClipFit = "cut" | "hold" | "still-fallback";
+
 /** Playable beat timing for the Timeline Player. */
 export type AssemblyBeat = {
   shotId: ShotId;
@@ -61,6 +64,10 @@ export type AssemblyBeat = {
   stillAssetPath?: string;
   voiceoverAssetPath?: string;
   clipAssetPath?: string;
+  /** Source Clip length before cut/hold against the Shot window. */
+  clipSourceDurationSeconds?: number;
+  /** cut = Clip longer than window; hold = shorter; still-fallback = generation failed. */
+  clipFit?: ClipFit;
   /** When a Clip fails, Player falls back to the Still for the whole window. */
   clipFailed?: boolean;
 };

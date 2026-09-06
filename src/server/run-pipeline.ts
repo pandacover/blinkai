@@ -1,4 +1,5 @@
-import type { Assembly, AssemblyBeat, FilmPlan } from "../shared";
+import type { Assembly, AssemblyBeat, ClipFit, FilmPlan } from "../shared";
+import { shortestClipDurationSeconds } from "./clip-duration";
 import type { ProjectRecord, ProjectStore } from "./project-store";
 import type { OpenRouterPort } from "./openrouter";
 
@@ -73,21 +74,24 @@ export async function runMediaPipeline(input: {
   }
 
   const clipPaths = new Map<string, string>();
+  const clipSourceDurations = new Map<string, number>();
   const clipFailed = new Set<string>();
   if (generateClips) {
     project = await store.updateProject(project.id, { status: "clips" });
     for (const shot of filmPlan.shots) {
       if (!shot.clipPrompt || !openRouter.generateClip) continue;
       const soft = shot.durationSeconds ?? 4;
+      const requested = shortestClipDurationSeconds(soft);
       try {
         const clip = await openRouter.generateClip({
           prompt: shot.clipPrompt,
-          durationSeconds: soft,
+          durationSeconds: requested,
         });
         const ext = extensionFor(clip.contentType, "mp4");
         const relativePath = `assets/clips/${shot.id}.${ext}`;
         await store.writeAsset(project.id, relativePath, clip.bytes);
         clipPaths.set(shot.id, relativePath);
+        clipSourceDurations.set(shot.id, clip.durationSeconds);
       } catch {
         clipFailed.add(shot.id);
       }
@@ -110,9 +114,14 @@ export async function runMediaPipeline(input: {
     };
     if (clipPaths.has(shot.id)) {
       beat.clipAssetPath = clipPaths.get(shot.id);
+      const sourceDuration = clipSourceDurations.get(shot.id) ?? durationSeconds;
+      beat.clipSourceDurationSeconds = sourceDuration;
+      // Exact match / longer → cut to window; shorter → hold last frame.
+      beat.clipFit = sourceDuration < durationSeconds - 0.05 ? "hold" : "cut";
     }
     if (clipFailed.has(shot.id)) {
       beat.clipFailed = true;
+      beat.clipFit = "still-fallback";
     }
     beats.push(beat);
     cursor += durationSeconds;

@@ -174,6 +174,34 @@ export function TimelinePlayer({ projectId, assembly, filmPlan }: Props) {
     }
   }
 
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const scrubbingRef = useRef(false);
+
+  function seekTo(seconds: number, resume: boolean) {
+    const clamped = Math.max(0, Math.min(total, seconds));
+    stopSources();
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    setElapsed(clamped);
+    offsetRef.current = clamped;
+    if (resume && audioContextRef.current) {
+      startedAtRef.current = audioContextRef.current.currentTime;
+      scheduleFrom(clamped);
+      rafRef.current = requestAnimationFrame(tick);
+      setPlaying(true);
+    } else {
+      startedAtRef.current = null;
+      setPlaying(false);
+    }
+  }
+
+  function scrubToClientX(clientX: number) {
+    const rail = railRef.current;
+    if (!rail || total <= 0) return;
+    const rect = rail.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    seekTo(ratio * total, false);
+  }
+
   const stillUrl = currentBeat?.stillAssetPath
     ? `/api/projects/${projectId}/${currentBeat.stillAssetPath}`
     : undefined;
@@ -185,15 +213,30 @@ export function TimelinePlayer({ projectId, assembly, filmPlan }: Props) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !clipUrl || !currentBeat) return;
-    const local = elapsed - currentBeat.startSeconds;
+    const local = Math.max(0, elapsed - currentBeat.startSeconds);
+    const sourceDuration = currentBeat.clipSourceDurationSeconds;
+    const hold =
+      currentBeat.clipFit === "hold" ||
+      (sourceDuration != null && sourceDuration < currentBeat.durationSeconds - 0.05);
+
+    if (hold && sourceDuration != null && local >= sourceDuration - 0.05) {
+      video.pause();
+      if (Number.isFinite(video.duration) && video.duration > 0) {
+        video.currentTime = Math.max(0, video.duration - 0.05);
+      } else {
+        video.currentTime = Math.max(0, sourceDuration - 0.05);
+      }
+      return;
+    }
+
     if (playing) {
       if (video.paused) void video.play().catch(() => undefined);
       if (Math.abs(video.currentTime - local) > 0.35) {
-        video.currentTime = Math.max(0, local);
+        video.currentTime = local;
       }
     } else {
       video.pause();
-      video.currentTime = Math.max(0, local);
+      video.currentTime = local;
     }
   }, [playing, elapsed, clipUrl, currentBeat]);
 
@@ -239,7 +282,28 @@ export function TimelinePlayer({ projectId, assembly, filmPlan }: Props) {
               {formatTime(elapsed)} / {formatTime(total)}
             </span>
           </div>
-          <div className="player__rail" role="list">
+          <div
+            className="player__rail"
+            role="slider"
+            aria-label="Shot beat rail"
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-valuenow={elapsed}
+            ref={railRef}
+            onPointerDown={(event) => {
+              scrubbingRef.current = true;
+              event.currentTarget.setPointerCapture(event.pointerId);
+              scrubToClientX(event.clientX);
+            }}
+            onPointerMove={(event) => {
+              if (!scrubbingRef.current) return;
+              scrubToClientX(event.clientX);
+            }}
+            onPointerUp={(event) => {
+              scrubbingRef.current = false;
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            }}
+          >
             {assembly.beats.map((beat, index) => {
               const width = total > 0 ? (beat.durationSeconds / total) * 100 : 0;
               const active = index === currentBeatIndex;
@@ -247,11 +311,13 @@ export function TimelinePlayer({ projectId, assembly, filmPlan }: Props) {
                 <button
                   key={beat.shotId}
                   type="button"
-                  role="listitem"
                   className={`player__beat ${active ? "player__beat--active" : ""}`}
                   style={{ width: `${width}%` }}
-                  onClick={() => jumpToBeat(index)}
-                  title={beat.shotId}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    jumpToBeat(index);
+                  }}
+                  title={`${beat.shotId}${beat.clipFit ? ` · ${beat.clipFit}` : ""}`}
                 />
               );
             })}

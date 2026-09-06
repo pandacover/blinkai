@@ -41,21 +41,34 @@ export function createApp(
   app.post("/api/runs", async (c) => {
     try {
       const brief = parseBrief(await c.req.json());
+      const wait = c.req.query("wait") === "1";
       const filmPlan = await openRouter.planFilm({ brief });
-      // Autosave after Film Plan
+      // Autosave after Film Plan — client can poll real status from here.
       let project = await store.createProject({
         brief,
         filmPlan,
         status: "planning",
       });
-      // Stills + Voiceover (+ optional Clips later) → Assembly autosave
-      project = await runMediaPipeline({
+
+      const pipeline = runMediaPipeline({
         project,
         filmPlan,
         openRouter,
         store,
+      }).catch(async (error) => {
+        await store.updateProject(project.id, { status: "failed" });
+        console.error("Run media pipeline failed:", error);
+        throw error;
       });
-      return c.json({ project }, 201);
+
+      if (wait) {
+        project = await pipeline;
+        return c.json({ project }, 201);
+      }
+
+      // Fire-and-continue: UI polls GET /api/projects/:id for stills/voiceover/clips/ready.
+      void pipeline;
+      return c.json({ project }, 202);
     } catch (error) {
       if (error instanceof BriefValidationError || error instanceof ZodError) {
         return c.json(
@@ -114,7 +127,6 @@ export function createApp(
     }
   });
 
-  // Serve Project assets for the Timeline Player
   app.get("/api/projects/:id/assets/*", async (c) => {
     const id = c.req.param("id");
     if (!id.startsWith("prj_")) {
@@ -124,7 +136,9 @@ export function createApp(
     if (!assetPath.startsWith("assets/") || assetPath.includes("..")) {
       return c.json({ error: "not_found" }, 404);
     }
-    const file = Bun.file(`${store.projectDir(id as `prj_${string}`)}/${assetPath}`);
+    const file = Bun.file(
+      `${store.projectDir(id as `prj_${string}`)}/${assetPath}`,
+    );
     if (!(await file.exists())) {
       return c.json({ error: "not_found" }, 404);
     }

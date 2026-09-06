@@ -331,6 +331,7 @@ code {
 }
 
 .player__rail {
+  cursor: ew-resize;
   display: flex;
   width: 100%;
   height: 0.55rem;

@@ -6,6 +6,7 @@ import type {
   StillResult,
   VoiceoverResult,
 } from "./openrouter";
+import { shortestClipDurationSeconds } from "./clip-duration";
 
 /** Pinned V1 roster — no silent fallbacks. */
 export const OPENROUTER_ROSTER = {
@@ -20,12 +21,6 @@ export type FetchLike = (
   init?: RequestInit,
 ) => Promise<Response>;
 
-/** Veo-style supported Clip lengths (seconds); pick shortest >= soft floor. */
-export function shortestClipDurationSeconds(softDurationSeconds: number): number {
-  const supported = [4, 6, 8];
-  const need = Math.max(1, softDurationSeconds);
-  return supported.find((d) => d >= need) ?? supported[supported.length - 1]!;
-}
 
 export type LiveOpenRouterOptions = {
   apiKey: string;
