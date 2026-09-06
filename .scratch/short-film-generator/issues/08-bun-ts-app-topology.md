@@ -38,3 +38,7 @@ Decide server framework (or none), frontend approach (SPA vs server-rendered vs 
 **Rejected for V1:** Next/Remix SSR hybrid (Timeline Player is client-native; key must stay off the bundle); raw `Bun.serve` alone (Hono is thin and typed); workspaces (one app, solo maintainer).
 
 ADR: [`docs/adr/0001-bun-ts-app-topology.md`](../../../docs/adr/0001-bun-ts-app-topology.md).
+
+## Comments
+
+- Grilling skipped: standing constraints already forced Bun-server + browser Timeline Player + solo local app; user confirmed no further grilling needed. Locked recommended stack as-is.
