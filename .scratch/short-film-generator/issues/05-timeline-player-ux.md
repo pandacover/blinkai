@@ -34,3 +34,7 @@ Do not build product UI in `src/`; keep the prototype disposable.
 
 ### Prototype asset
 [`.scratch/short-film-generator/prototypes/timeline-player-ux.html`](../prototypes/timeline-player-ux.html) — `?variant=A|B|C`, shared Web Audio + rAF engine, synthetic VO buffer + SVG stills from the example Film Plan.
+
+## Comments
+
+- **2026-09-06 — resolved.** Prototype variants A/B/C exercised in-browser; locked V1 to beat-aligned Film stage (B). Indexed on the map under Decisions so far. No further work on this ticket.
