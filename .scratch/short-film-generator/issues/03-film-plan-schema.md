@@ -1,7 +1,7 @@
 # 03 — Film Plan schema for stills-and-voiceover shorts
 
 Type: grilling
-Status: open
+Status: claimed
 
 ## Question
 
