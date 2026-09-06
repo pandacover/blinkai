@@ -19,21 +19,21 @@
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: var(--font-ui); }
-    body { padding: 24px 24px 110px; }
+    body { padding: 16px 16px 96px; }
     .banner {
       border: 1px dashed var(--accent);
       background: #1a1710;
       color: var(--accent);
-      padding: 10px 14px;
-      font-size: 13px;
+      padding: 8px 12px;
+      font-size: 12px;
       letter-spacing: 0.02em;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
-    h1 { font-family: var(--font-display); font-weight: 500; font-size: 28px; margin: 0 0 8px; }
-    .question { color: var(--muted); max-width: 62ch; line-height: 1.45; margin-bottom: 18px; }
-    .layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+    h1 { font-family: var(--font-display); font-weight: 500; font-size: 22px; margin: 0 0 4px; }
+    .question { color: var(--muted); max-width: 72ch; line-height: 1.4; margin-bottom: 12px; font-size: 13px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; align-items: start; }
     @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
-    .stage-wrap { background: var(--panel); border: 1px solid var(--line); padding: 16px; }
+    .stage-wrap { background: var(--panel); border: 1px solid var(--line); padding: 12px; }
     .meta { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
     .meta strong { color: var(--ink); font-weight: 600; }
     .state-panel {
@@ -52,12 +52,14 @@
     .frame {
       position: relative;
       width: 100%;
+      max-height: min(42vh, 420px);
       aspect-ratio: 16 / 9;
       background: #000;
       overflow: hidden;
       isolation: isolate;
+      margin: 0 auto;
     }
-    .frame[data-ratio="9:16"] { aspect-ratio: 9 / 16; max-width: 360px; margin: 0 auto; }
+    .frame[data-ratio="9:16"] { aspect-ratio: 9 / 16; max-width: 240px; max-height: min(48vh, 480px); }
     .still {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
@@ -89,27 +91,31 @@
     .a-time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 7ch; text-align: right; }
 
     /* Variant B — beat timeline */
-    .b-shell { margin-top: 14px; }
-    .b-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .b-shell { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 12px; }
+    .b-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
     .b-timeline {
-      position: relative; height: 44px; background: #12141a; border: 1px solid var(--line); border-radius: 4px;
-      cursor: pointer; user-select: none;
+      position: relative; height: 56px; background: #0a0c10; border: 1px solid var(--accent);
+      border-radius: 4px; cursor: pointer; user-select: none;
+      box-shadow: inset 0 0 0 1px rgba(232,192,122,0.15);
     }
-    .b-fill { position: absolute; inset: 0 auto 0 0; width: 0%; background: rgba(232,192,122,0.18); pointer-events: none; }
-    .b-playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); left: 0%; pointer-events: none; }
+    .b-fill { position: absolute; inset: 0 auto 0 0; width: 0%; background: rgba(232,192,122,0.22); pointer-events: none; }
+    .b-playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); left: 0%; pointer-events: none; z-index: 2; }
     .b-beat {
-      position: absolute; top: 6px; bottom: 6px; border-left: 1px solid rgba(255,255,255,0.18);
-      padding-left: 6px; font-size: 11px; color: var(--muted); overflow: hidden; white-space: nowrap;
+      position: absolute; top: 4px; bottom: 4px; border-left: 2px solid rgba(255,255,255,0.28);
+      padding: 6px 8px 0; font-size: 11px; color: var(--muted); overflow: hidden; white-space: nowrap;
+      display: flex; flex-direction: column; gap: 2px;
     }
-    .b-beat.active { color: var(--ink); border-left-color: var(--accent); background: rgba(232,192,122,0.08); }
+    .b-beat strong { color: var(--ink); font-size: 12px; font-weight: 600; }
+    .b-beat.active { color: var(--ink); border-left-color: var(--accent); background: rgba(232,192,122,0.14); }
     .b-shotchip {
       display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px;
-      background: #222632; border: 1px solid var(--line); border-radius: 4px; font-size: 13px;
+      background: #222632; border: 1px solid var(--accent); border-radius: 4px; font-size: 13px;
     }
     .b-shotchip em { color: var(--accent); font-style: normal; font-weight: 600; }
+    .b-hint { color: var(--accent); font-size: 12px; margin: 0 0 8px; }
 
     /* Variant C — cinema */
-    .c-root { background: #050506; margin: -16px; padding: 32px 16px 20px; border: 1px solid #111; }
+    .c-root { background: #050506; margin: -12px; padding: 18px 12px 14px; border: 1px solid #111; }
     .c-title {
       text-align: center; font-family: var(--font-display); font-size: 22px; margin: 0 0 4px; letter-spacing: 0.02em;
     }
@@ -439,6 +445,7 @@
           <div class="caption" id="caption"></div>
         </div>
         <div class="b-shell">
+          <p class="b-hint">Beat rail — click a Shot segment to jump · scrub anywhere</p>
           <div class="b-row">
             <button class="btn primary" id="play" type="button">Play</button>
             <span class="b-shotchip">Shot <em id="chip-id">—</em> <span id="chip-label"></span></span>
@@ -448,7 +455,7 @@
             <div class="b-fill" id="fill"></div>
             <div class="b-playhead" id="playhead"></div>
             ${player.shots.map((s) => `
-              <div class="b-beat" data-id="${s.id}" style="left:${(s.start / player.duration) * 100}%; width:${(s.durationSeconds / player.duration) * 100}%">${s.id.replace("shot_", "")}</div>
+              <div class="b-beat" data-id="${s.id}" style="left:${(s.start / player.duration) * 100}%; width:${(s.durationSeconds / player.duration) * 100}%"><strong>${s.id.replace("shot_", "S")}</strong><span>${s.label}</span></div>
             `).join("")}
           </div>
         </div>
