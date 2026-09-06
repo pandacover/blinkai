@@ -3,24 +3,31 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Regression for infinite GET /api/projects/:id polling.
- * User DevTools showed initiator App.tsx:115 = pollUntilReady's fetch in the
- * pre-wait=1 client. That loop must not return.
+ * Progress watching is allowed, but must be bounded.
+ * Regression: unbounded pollUntilReady at App.tsx:115 spammed GET /api/projects/:id.
  */
-describe("client Run must not poll Project status", () => {
+describe("client Run progress watching", () => {
   const source = readFileSync(join(import.meta.dir, "App.tsx"), "utf8");
 
-  test("does not define pollUntilReady", () => {
-    expect(source).not.toMatch(/\bpollUntilReady\b/);
+  test("does not define an unbounded poll helper by the old name", () => {
+    // Allow mentions in comments only if needed; forbid a live helper identifier.
+    expect(source).not.toMatch(/async function pollUntilReady\b/);
+    expect(source).not.toMatch(/function pollUntilReady\b/);
   });
 
-  test("does not while-loop fetch /api/projects/:id", () => {
-    expect(source).not.toMatch(
-      /while\s*\([^)]*\)\s*\{[\s\S]{0,400}?fetch\(\s*[`'"]\/api\/projects\/\$\{/,
-    );
+  test("starts Runs in async mode so status steps can update live", () => {
+    expect(source).toContain("/api/runs?async=1");
   });
 
-  test("starts Runs with wait=1 (server completes Assembly)", () => {
-    expect(source).toContain("/api/runs?wait=1");
+  test("progress watch stops on ready, failed, and timeout", () => {
+    expect(source).toContain("watchRunProgress");
+    expect(source).toMatch(/status === "ready"/);
+    expect(source).toMatch(/status === "failed"/);
+    expect(source).toMatch(/timeoutMs\s*=\s*120_000/);
+  });
+
+  test("renders a Run progress stepper", () => {
+    expect(source).toContain("run-progress");
+    expect(source).toContain("RUN_STEPS");
   });
 });

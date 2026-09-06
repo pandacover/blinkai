@@ -219,8 +219,70 @@ code {
 }
 
 .shell__stage {
+  margin: 0.65rem 0 0;
   color: var(--accent);
   font-weight: 700;
+}
+
+.run-progress {
+  margin-top: 0.85rem;
+}
+
+.run-progress__steps {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.run-progress__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.run-progress__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: rgba(16, 35, 31, 0.22);
+}
+
+.run-progress__step--done {
+  color: var(--ink);
+}
+
+.run-progress__step--done .run-progress__dot {
+  background: var(--accent);
+}
+
+.run-progress__step--current {
+  color: var(--accent);
+}
+
+.run-progress__step--current .run-progress__dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(20, 120, 90, 0.18);
+  animation: pulse-dot 1.1s ease-in-out infinite;
+}
+
+.run-progress__step--todo {
+  opacity: 0.55;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
 }
 
 .library__list {

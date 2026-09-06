@@ -38,6 +38,14 @@ type BriefFormState = {
 
 type RunStage = "idle" | "planning" | "stills" | "voiceover" | "clips" | "ready";
 
+const RUN_STEPS: { id: Exclude<RunStage, "idle">; label: string }[] = [
+  { id: "planning", label: "Film Plan" },
+  { id: "stills", label: "Stills" },
+  { id: "voiceover", label: "Voiceover" },
+  { id: "clips", label: "Clips" },
+  { id: "ready", label: "Assembly" },
+];
+
 const initialBrief: BriefFormState = {
   idea: "",
   durationTarget: "15s",
@@ -46,6 +54,27 @@ const initialBrief: BriefFormState = {
   aspectRatio: "16:9",
   includeClips: false,
 };
+
+function stageFromStatus(status: ProjectStatus): RunStage {
+  switch (status) {
+    case "planning":
+      return "planning";
+    case "stills":
+      return "stills";
+    case "voiceover":
+      return "voiceover";
+    case "clips":
+      return "clips";
+    case "ready":
+      return "ready";
+    default:
+      return "idle";
+  }
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
 
 export function App() {
   const [status, setStatus] = useState<ApiStatus>({ kind: "loading" });
@@ -92,6 +121,14 @@ export function App() {
     };
   }, []);
 
+  const visibleSteps = useMemo(
+    () =>
+      form.includeClips
+        ? RUN_STEPS
+        : RUN_STEPS.filter((step) => step.id !== "clips"),
+    [form.includeClips],
+  );
+
   const stageLabel = useMemo(() => {
     switch (runStage) {
       case "planning":
@@ -109,15 +146,43 @@ export function App() {
     }
   }, [runStage]);
 
+  /**
+   * Bounded progress watch: maps Project.status → stepper, stops on ready/failed/timeout.
+   * Must never spin forever (regression: unbounded Project status GET loops).
+   */
+  async function watchRunProgress(projectId: ProjectId): Promise<ProjectView> {
+    const started = Date.now();
+    const timeoutMs = 120_000;
+    const intervalMs = 400;
+    while (Date.now() - started < timeoutMs) {
+      const response = await fetch(`/api/projects/${projectId}`);
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body.message ?? "Could not read Run progress");
+      }
+      const next = body.project as ProjectView;
+      setProject(next);
+      setRenameValue(next.displayTitle);
+      if (next.status === "failed") {
+        throw new Error("Run failed while generating media");
+      }
+      setRunStage(stageFromStatus(next.status));
+      if (next.status === "ready" && next.assembly) {
+        return next;
+      }
+      await sleep(intervalMs);
+    }
+    throw new Error("Timed out waiting for Assembly — check server logs");
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
     setSubmitting(true);
     setRunStage("planning");
     try {
-      // wait=1: server runs Film Plan + media to completion — no client poll loop.
-      setRunStage("stills");
-      const response = await fetch("/api/runs?wait=1", {
+      // async=1: return after Film Plan so the UI can show live status steps.
+      const response = await fetch("/api/runs?async=1", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(form),
@@ -126,12 +191,16 @@ export function App() {
       if (!response.ok) {
         throw new Error(body.message ?? "Could not start Run");
       }
-      const finished = body.project as ProjectView;
-      if (finished.status !== "ready" || !finished.assembly) {
-        throw new Error(
-          `Run finished without Assembly (status=${finished.status}). Check server logs.`,
-        );
+      const started = body.project as ProjectView;
+      setProject(started);
+      setRenameValue(started.displayTitle);
+      setRunStage(stageFromStatus(started.status));
+      if (started.status === "ready" && started.assembly) {
+        setView("player");
+        await refreshLibrary();
+        return;
       }
+      const finished = await watchRunProgress(started.id);
       setProject(finished);
       setRenameValue(finished.displayTitle);
       setRunStage("ready");
@@ -220,7 +289,33 @@ export function App() {
             <code>OPENROUTER_API_KEY</code> is set in <code>.env</code>.
           </p>
         )}
-        {stageLabel && <p className="shell__stage">{stageLabel}</p>}
+        {runStage !== "idle" && (
+          <div className="run-progress" aria-label="Run progress">
+            <ol className="run-progress__steps">
+              {visibleSteps.map((step) => {
+                const currentIndex = visibleSteps.findIndex((s) => s.id === runStage);
+                const stepIndex = visibleSteps.findIndex((s) => s.id === step.id);
+                const state =
+                  runStage === "ready" || stepIndex < currentIndex
+                    ? "done"
+                    : stepIndex === currentIndex
+                      ? "current"
+                      : "todo";
+                return (
+                  <li
+                    key={step.id}
+                    className={`run-progress__step run-progress__step--${state}`}
+                    aria-current={state === "current" ? "step" : undefined}
+                  >
+                    <span className="run-progress__dot" />
+                    <span className="run-progress__label">{step.label}</span>
+                  </li>
+                );
+              })}
+            </ol>
+            {stageLabel && <p className="shell__stage">{stageLabel}</p>}
+          </div>
+        )}
         {submitError && <p className="shell__error">{submitError}</p>}
       </section>
 
