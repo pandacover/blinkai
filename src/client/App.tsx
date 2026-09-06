@@ -188,7 +188,7 @@ export function App() {
           </button>
           {project?.assembly && (
             <button type="button" onClick={() => setView("player")}>
-              Player
+              Timeline Player
             </button>
           )}
         </nav>

@@ -129,7 +129,7 @@ Rules: echo durationTarget/aspectRatio/includeClips from the Brief. Empty voiceo
         };
       }
       throw new Error(
-        `OpenRouter Still model ${OPENROUTER_ROSTER.stills} returned no image data.`,
+        `OpenRouter Still model ${OPENROUTER_ROSTER.stills} returned no Still data.`,
       );
     },
 
@@ -187,7 +187,7 @@ Rules: echo durationTarget/aspectRatio/includeClips from the Brief. Empty voiceo
         };
       }
       throw new Error(
-        `OpenRouter Clip model ${OPENROUTER_ROSTER.clips} returned no video data.`,
+        `OpenRouter Clip model ${OPENROUTER_ROSTER.clips} returned no Clip data.`,
       );
     },
   };
