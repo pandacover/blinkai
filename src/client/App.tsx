@@ -343,6 +343,29 @@ export function App() {
             <div className="plan">
               <h2 className="plan__title">{project.filmPlan.title}</h2>
               <p className="plan__logline">{project.filmPlan.logline}</p>
+              <p className="plan__meta">
+                {project.filmPlan.durationTarget} · {project.filmPlan.aspectRatio}
+                {project.filmPlan.includeClips ? " · Include Clips" : " · Stills + Voiceover"}
+              </p>
+              <ol className="plan__shots">
+                {project.filmPlan.shots.map((shot) => (
+                  <li key={shot.id} className="plan__shot">
+                    <p className="plan__shot-id">{shot.id}</p>
+                    <p>
+                      <strong>Still:</strong> {shot.stillPrompt}
+                    </p>
+                    <p>
+                      <strong>Voiceover:</strong>{" "}
+                      {shot.voiceover || <em>(silent)</em>}
+                    </p>
+                    {shot.clipPrompt && (
+                      <p>
+                        <strong>Clip:</strong> {shot.clipPrompt}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ol>
             </div>
           )}
           {project.assembly ? (

@@ -9,16 +9,23 @@ import type {
 
 /** Pinned V1 roster — no silent fallbacks. */
 export const OPENROUTER_ROSTER = {
-  filmPlan: "deepseek/deepseek-chat-v3-0324",
-  stills: "google/gemini-2.5-flash-image-preview",
-  voiceover: "openai/gpt-audio",
-  clips: "google/veo-2",
+  filmPlan: "deepseek/deepseek-v4-flash-0731",
+  stills: "bytedance-seed/seedream-5-0-pro",
+  voiceover: "hexgrad/kokoro-82m",
+  clips: "google/veo-3.1-fast",
 } as const;
 
 export type FetchLike = (
   input: string,
   init?: RequestInit,
 ) => Promise<Response>;
+
+/** Veo-style supported Clip lengths (seconds); pick shortest >= soft floor. */
+export function shortestClipDurationSeconds(softDurationSeconds: number): number {
+  const supported = [4, 6, 8];
+  const need = Math.max(1, softDurationSeconds);
+  return supported.find((d) => d >= need) ?? supported[supported.length - 1]!;
+}
 
 export type LiveOpenRouterOptions = {
   apiKey: string;
@@ -31,6 +38,28 @@ export type LiveOpenRouterOptions = {
  * Failures throw with actionable messages (no silent model fallbacks).
  * Voiceover omits `voice` so the provider default is used.
  */
+function durationSecondsFromWav(bytes: Uint8Array): number {
+  // PCM WAV: byteRate at offset 28 when RIFF/WAVE fmt is standard.
+  if (
+    bytes.byteLength >= 44 &&
+    bytes[0] === 0x52 &&
+    bytes[8] === 0x57 &&
+    bytes[20] === 1
+  ) {
+    const byteRate =
+      bytes[28]! |
+      (bytes[29]! << 8) |
+      (bytes[30]! << 16) |
+      (bytes[31]! << 24);
+    const dataSize = bytes.byteLength - 44;
+    if (byteRate > 0) {
+      return Math.max(0.25, dataSize / byteRate);
+    }
+  }
+  // Non-WAV / unexpected container: conservative floor from payload size.
+  return Math.max(1.2, bytes.byteLength / 32000);
+}
+
 export function createLiveOpenRouterPort(
   options: LiveOpenRouterOptions,
 ): OpenRouterPort {
@@ -144,8 +173,7 @@ Rules: echo durationTarget/aspectRatio/includeClips from the Brief. Empty voiceo
         }),
       });
       const bytes = new Uint8Array(await response.arrayBuffer());
-      // Approximate duration from WAV size when header is standard PCM; else soft floor.
-      const durationSeconds = Math.max(1.2, bytes.byteLength / 32000);
+      const durationSeconds = durationSecondsFromWav(bytes);
       return {
         bytes,
         contentType: "audio/wav",
@@ -159,7 +187,7 @@ Rules: echo durationTarget/aspectRatio/includeClips from the Brief. Empty voiceo
         body: JSON.stringify({
           model: OPENROUTER_ROSTER.clips,
           prompt,
-          duration: Math.max(4, Math.ceil(durationSeconds)),
+          duration: shortestClipDurationSeconds(durationSeconds),
         }),
       });
       const payload = (await response.json()) as {
@@ -170,7 +198,7 @@ Rules: echo durationTarget/aspectRatio/includeClips from the Brief. Empty voiceo
         return {
           bytes: Uint8Array.from(Buffer.from(first.b64_json, "base64")),
           contentType: "video/mp4",
-          durationSeconds: Math.max(4, durationSeconds),
+          durationSeconds: shortestClipDurationSeconds(durationSeconds),
         };
       }
       if (first?.url) {
@@ -183,7 +211,7 @@ Rules: echo durationTarget/aspectRatio/includeClips from the Brief. Empty voiceo
         return {
           bytes: new Uint8Array(await video.arrayBuffer()),
           contentType: video.headers.get("content-type") ?? "video/mp4",
-          durationSeconds: Math.max(4, durationSeconds),
+          durationSeconds: shortestClipDurationSeconds(durationSeconds),
         };
       }
       throw new Error(

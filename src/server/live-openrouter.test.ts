@@ -67,6 +67,11 @@ describe("Live OpenRouter adapter", () => {
       },
     });
     expect(plan.title).toBe("Live");
+    
+    expect(OPENROUTER_ROSTER.filmPlan).toBe("deepseek/deepseek-v4-flash-0731");
+    expect(OPENROUTER_ROSTER.stills).toBe("bytedance-seed/seedream-5-0-pro");
+    expect(OPENROUTER_ROSTER.voiceover).toBe("hexgrad/kokoro-82m");
+    expect(OPENROUTER_ROSTER.clips).toBe("google/veo-3.1-fast");
     expect(calls[0]!.body.model).toBe(OPENROUTER_ROSTER.filmPlan);
 
     await port.generateStill({ prompt: "pier" });
