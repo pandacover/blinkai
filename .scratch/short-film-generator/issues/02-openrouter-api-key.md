@@ -1,7 +1,7 @@
 # 02 — OpenRouter API key supply and storage
 
 Type: grilling
-Status: open
+Status: claimed
 
 ## Question
 
