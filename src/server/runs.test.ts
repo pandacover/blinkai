@@ -59,6 +59,16 @@ describe("Run API: Brief → Film Plan Project", () => {
         seenPlanningInput = input;
         return fixturePlan(input.brief);
       },
+      async generateStill() {
+        return { bytes: new Uint8Array([1, 2, 3]), contentType: "image/png" };
+      },
+      async generateVoiceover({ text }) {
+        return {
+          bytes: new TextEncoder().encode(text),
+          contentType: "audio/wav",
+          durationSeconds: 2,
+        };
+      },
     };
 
     const store = createProjectStore(config.dataDir);
@@ -113,6 +123,16 @@ describe("Run API: Brief → Film Plan Project", () => {
       async planFilm(input) {
         return fixturePlan(input.brief);
       },
+      async generateStill() {
+        return { bytes: new Uint8Array([1, 2, 3]), contentType: "image/png" };
+      },
+      async generateVoiceover({ text }) {
+        return {
+          bytes: new TextEncoder().encode(text),
+          contentType: "audio/wav",
+          durationSeconds: 2,
+        };
+      },
     };
 
     const app = createApp(config, {
@@ -143,6 +163,12 @@ describe("Run API: Brief → Film Plan Project", () => {
     const app = createApp(config, {
       openRouter: {
         async planFilm() {
+          throw new Error("should not be called");
+        },
+        async generateStill() {
+          throw new Error("should not be called");
+        },
+        async generateVoiceover() {
           throw new Error("should not be called");
         },
       },

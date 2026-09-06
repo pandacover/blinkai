@@ -4,11 +4,15 @@
 
 **Blocked by:** 04 — Timeline Player for a Project
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Include Clips off still produces no clip prompts or clip assets
-- [ ] Include Clips on allows mixed optional `clipPrompt`s; Still always generated
-- [ ] Clips are muted; Voiceover remains the only audible track
-- [ ] Long Clip cut / short Clip hold-last-frame / Clip failure → Still fallback are visible in Assembly and Player
-- [ ] Planner requests shortest supported Clip duration ≥ soft Shot duration when possible (fake port may simulate)
-- [ ] Run API tests cover mixed Clip Assemblies; Player plays a mixed Project correctly
+- [x] Include Clips off still produces no clip prompts or clip assets
+- [x] Include Clips on allows mixed optional `clipPrompt`s; Still always generated
+- [x] Clips are muted; Voiceover remains the only audible track
+- [x] Long Clip cut / short Clip hold-last-frame / Clip failure → Still fallback are visible in Assembly and Player
+- [x] Planner requests shortest supported Clip duration ≥ soft Shot duration when possible (fake port may simulate)
+- [x] Run API tests cover mixed Clip Assemblies; Player plays a mixed Project correctly
+
+## Comments
+
+- 2026-09-06: Optional clipPrompt generation, muted Clip assets, cut/hold/failure→Still encoded in Assembly; Player prefers Clip when present.

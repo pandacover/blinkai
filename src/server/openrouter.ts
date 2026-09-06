@@ -54,6 +54,29 @@ export type PlanningInput = {
   brief: Brief;
 };
 
+export type StillResult = {
+  bytes: Uint8Array;
+  contentType: string;
+};
+
+export type VoiceoverResult = {
+  bytes: Uint8Array;
+  contentType: string;
+  durationSeconds: number;
+};
+
+export type ClipResult = {
+  bytes: Uint8Array;
+  contentType: string;
+  durationSeconds: number;
+};
+
 export type OpenRouterPort = {
   planFilm(input: PlanningInput): Promise<FilmPlan>;
+  generateStill(input: { prompt: string }): Promise<StillResult>;
+  generateVoiceover(input: { text: string }): Promise<VoiceoverResult>;
+  generateClip?(input: {
+    prompt: string;
+    durationSeconds: number;
+  }): Promise<ClipResult>;
 };

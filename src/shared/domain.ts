@@ -37,14 +37,23 @@ export type FilmPlan = {
 /** Locally saved Run identity (one Project = one Run). */
 export type ProjectId = `prj_${string}`;
 
+export type ProjectStatus =
+  | "planning"
+  | "stills"
+  | "voiceover"
+  | "clips"
+  | "ready"
+  | "failed";
+
 export type ProjectMeta = {
   id: ProjectId;
   displayTitle: string;
   createdAt: string;
   updatedAt: string;
+  status: ProjectStatus;
 };
 
-/** Playable beat timing for the Timeline Player (filled in later tickets). */
+/** Playable beat timing for the Timeline Player. */
 export type AssemblyBeat = {
   shotId: ShotId;
   startSeconds: number;
@@ -52,6 +61,8 @@ export type AssemblyBeat = {
   stillAssetPath?: string;
   voiceoverAssetPath?: string;
   clipAssetPath?: string;
+  /** When a Clip fails, Player falls back to the Still for the whole window. */
+  clipFailed?: boolean;
 };
 
 /** Manifest that combines Shots/assets into one Film for the Timeline Player. */

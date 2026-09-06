@@ -4,10 +4,14 @@
 
 **Blocked by:** 04 — Timeline Player for a Project
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Library lists Projects from `BLINKAI_DATA_DIR` with display titles from metadata
-- [ ] Rename updates display title only; folder id unchanged
-- [ ] Reopen loads existing Brief/Film Plan/Assembly/assets into the Timeline Player
-- [ ] Missing/corrupt Project fails loudly without deleting siblings
-- [ ] Run/Project API tests cover list, rename, and get/reopen
+- [x] Library lists Projects from `BLINKAI_DATA_DIR` with display titles from metadata
+- [x] Rename updates display title only; folder id unchanged
+- [x] Reopen loads existing Brief/Film Plan/Assembly/assets into the Timeline Player
+- [x] Missing/corrupt Project fails loudly without deleting siblings
+- [x] Run/Project API tests cover list, rename, and get/reopen
+
+## Comments
+
+- 2026-09-06: GET /api/projects list, PATCH rename displayTitle, reopen via GET /api/projects/:id into Player; library UI.

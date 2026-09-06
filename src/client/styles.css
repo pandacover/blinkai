@@ -198,3 +198,159 @@ code {
     grid-template-columns: 1fr;
   }
 }
+
+.shell__nav {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.shell__nav button,
+.project__rename button,
+.brief__submit,
+.player__controls button {
+  border: 0;
+  background: var(--accent);
+  color: #f4fffb;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.shell__stage {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.library__list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.library__list button {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.85rem 1rem;
+  display: grid;
+  gap: 0.25rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.project__rename {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.project__rename input {
+  flex: 1;
+  border: 1px solid rgba(16, 35, 31, 0.18);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+}
+
+.player {
+  margin-top: 1.5rem;
+}
+
+.player__stage {
+  position: relative;
+  width: 100%;
+  background: #0b1210;
+  overflow: hidden;
+}
+
+.player__stage--landscape {
+  aspect-ratio: 16 / 9;
+}
+
+.player__stage--portrait {
+  aspect-ratio: 9 / 16;
+  max-width: 22rem;
+  margin: 0 auto;
+}
+
+.player__media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.player__media--empty {
+  color: #d7ece6;
+  display: grid;
+  place-items: center;
+}
+
+.player__chrome {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 0.75rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+  color: #f4fffb;
+  transition: opacity 200ms ease;
+}
+
+.player__chrome--quiet {
+  opacity: 0.35;
+}
+
+.player__chrome:hover,
+.player__chrome:focus-within {
+  opacity: 1;
+}
+
+.player__film-title {
+  margin: 0;
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-weight: 700;
+}
+
+.player__logline,
+.player__caption,
+.player__time,
+.player__chip {
+  margin: 0.2rem 0 0;
+  font-size: 0.92rem;
+}
+
+.player__controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.6rem;
+}
+
+.player__rail {
+  display: flex;
+  width: 100%;
+  height: 0.55rem;
+  margin-top: 0.75rem;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.player__beat {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+}
+
+.player__beat--active {
+  background: #3ddc97;
+}
+
+.player__beat + .player__beat {
+  border-left: 1px solid rgba(0, 0, 0, 0.35);
+}

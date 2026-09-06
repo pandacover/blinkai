@@ -7,6 +7,7 @@ export type {
   FilmPlan,
   ProjectId,
   ProjectMeta,
+  ProjectStatus,
   Shot,
   ShotId,
 } from "./domain";

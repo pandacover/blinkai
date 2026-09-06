@@ -4,12 +4,16 @@
 
 **Blocked by:** 02 — Brief → Film Plan Project
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Every Shot gets a Still asset; Voiceover audio is generated when the line is non-empty
-- [ ] Empty Voiceover requires soft `durationSeconds`; Shot window = max(soft duration, Voiceover audio length)
-- [ ] Assembly manifest lists ordered Shots with resolved window lengths and asset references
-- [ ] Project layout includes `assembly.json` and `assets/stills/` + `assets/voiceover/` as needed
-- [ ] UI shows progress for planning / Stills / Voiceover stages
-- [ ] Autosave occurs after Film Plan ready and after media/Assembly ready
-- [ ] Run API tests assert Assembly timing rules and on-disk assets via the fake port
+- [x] Every Shot gets a Still asset; Voiceover audio is generated when the line is non-empty
+- [x] Empty Voiceover requires soft `durationSeconds`; Shot window = max(soft duration, Voiceover audio length)
+- [x] Assembly manifest lists ordered Shots with resolved window lengths and asset references
+- [x] Project layout includes `assembly.json` and `assets/stills/` + `assets/voiceover/` as needed
+- [x] UI shows progress for planning / Stills / Voiceover stages
+- [x] Autosave occurs after Film Plan ready and after media/Assembly ready
+- [x] Run API tests assert Assembly timing rules and on-disk assets via the fake port
+
+## Comments
+
+- 2026-09-06: Assembly pipeline with audio-wins windows, fake Still/Voiceover port, progress UI, autosave after Film Plan and Assembly.
