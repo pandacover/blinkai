@@ -14,6 +14,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 
 ## Decisions so far
 
+- [01 — Brief optional controls for V1](./issues/01-brief-optional-controls.md): Idea + Duration Target (15s/30s, default 15s, soft) + optional Mood/Visual Style (blank = omit) + Aspect Ratio (16:9 default / 9:16) + Include Clips (default off); no VO language/voice on Brief.
 - [09 — In-browser Assembly without MP4 export](./issues/09-in-browser-assembly-research.md): Web Audio master clock + rAF still cuts (+ muted `playsinline` video for optional Clips); user-gesture gated; no MP4 encode for V1 playback. Write-up: [`docs/research/in-browser-assembly.md`](../../docs/research/in-browser-assembly.md).
 
 ## Not yet specified

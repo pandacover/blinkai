@@ -13,8 +13,32 @@ The structured textual blueprint (story, shots, and media prompts) produced befo
 _Avoid_: script (alone), screenplay (alone), storyboard (alone)
 
 **Brief**:
-The user's starting input that kicks off a run.
+The user's starting input that kicks off a run: a required Idea plus optional controls.
 _Avoid_: prompt (as the product noun), query, request
+
+**Idea**:
+The free-text description of what the Film should be about; the required core of a Brief.
+_Avoid_: prompt (as the product noun), synopsis (when meaning the user's raw input)
+
+**Duration Target**:
+The Brief control choosing a soft target length for the Film: `15s` or `30s`.
+_Avoid_: runtime (alone), length budget (implies a hard cap)
+
+**Mood**:
+An optional short-text Brief control naming the emotional tone; when blank, it is omitted from the Film Plan.
+_Avoid_: tone (as a separate product noun), vibe
+
+**Aspect Ratio**:
+The Brief control choosing the Film frame shape: `16:9` or `9:16`.
+_Avoid_: orientation, format (when meaning frame shape)
+
+**Visual Style**:
+An optional short-text Brief control naming the look of Stills; when blank, it is omitted from the Film Plan.
+_Avoid_: aesthetic, art style (as a separate product noun)
+
+**Include Clips**:
+The Brief toggle that opts a Run into Clip generation; off by default.
+_Avoid_: enable video, motion toggle
 
 **Still**:
 A single generated image used as a visual beat in the Film.
