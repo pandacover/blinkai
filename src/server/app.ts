@@ -1,0 +1,229 @@
+import { serveStatic } from "hono/bun";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { Hono } from "hono";
+import { ZodError } from "zod";
+import type { ServerConfig } from "./env";
+import { createFakeOpenRouterPort } from "./fake-openrouter";
+import {
+  BriefValidationError,
+  type OpenRouterPort,
+  parseBrief,
+} from "./openrouter";
+import {
+  createProjectStore,
+  type ProjectStore,
+} from "./project-store";
+import { runMediaPipeline } from "./run-pipeline";
+
+export type CreateAppOptions = {
+  /** Absolute path to Vite build output; enables SPA static serving when present. */
+  staticDir?: string;
+  openRouter?: OpenRouterPort;
+  store?: ProjectStore;
+};
+
+export function createApp(
+  config: ServerConfig,
+  options: CreateAppOptions = {},
+): Hono {
+  const app = new Hono();
+  const openRouter = options.openRouter ?? createFakeOpenRouterPort();
+  const store = options.store ?? createProjectStore(config.dataDir);
+
+  app.get("/api/ready", (c) =>
+    c.json({
+      ready: true,
+      service: "blinkai",
+    }),
+  );
+
+  app.post("/api/runs", async (c) => {
+    try {
+      const brief = parseBrief(await c.req.json());
+      // stream=1: NDJSON status events + final project (no client Project GET poll).
+      // async=1: background 202 (legacy). Default / wait=1: sync JSON 201.
+      const streamRun = c.req.query("stream") === "1";
+      const asyncRun =
+        !streamRun &&
+        c.req.query("async") === "1" &&
+        c.req.query("wait") !== "1";
+
+      if (streamRun) {
+        const encoder = new TextEncoder();
+        const body = new ReadableStream<Uint8Array>({
+          start: async (controller) => {
+            let projectId: `prj_${string}` | undefined;
+            const send = (event: Record<string, unknown>) => {
+              controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+            };
+            try {
+              send({ type: "status", status: "planning" });
+              const filmPlan = await openRouter.planFilm({ brief });
+              let project = await store.createProject({
+                brief,
+                filmPlan,
+                status: "planning",
+              });
+              projectId = project.id;
+              send({
+                type: "status",
+                status: "planning",
+                projectId: project.id,
+              });
+              project = await runMediaPipeline({
+                project,
+                filmPlan,
+                openRouter,
+                store,
+                onStatus: (status) => send({ type: "status", status }),
+              });
+              send({ type: "done", project });
+            } catch (error) {
+              const message =
+                error instanceof Error
+                  ? error.message
+                  : "Run failed while generating media";
+              if (projectId) {
+                try {
+                  await store.updateProject(projectId, { status: "failed" });
+                } catch {
+                  // Best-effort: stream already failed.
+                }
+              }
+              send({ type: "error", message });
+            } finally {
+              controller.close();
+            }
+          },
+        });
+        return new Response(body, {
+          status: 200,
+          headers: {
+            "content-type": "application/x-ndjson; charset=utf-8",
+            "cache-control": "no-cache",
+            // Discourage proxies from buffering progress lines.
+            "x-accel-buffering": "no",
+          },
+        });
+      }
+
+      const filmPlan = await openRouter.planFilm({ brief });
+      // Autosave after Film Plan (async clients may poll status from here).
+      let project = await store.createProject({
+        brief,
+        filmPlan,
+        status: "planning",
+      });
+
+      const pipeline = runMediaPipeline({
+        project,
+        filmPlan,
+        openRouter,
+        store,
+      }).catch(async (error) => {
+        await store.updateProject(project.id, { status: "failed" });
+        console.error("Run media pipeline failed:", error);
+        throw error;
+      });
+
+      if (!asyncRun) {
+        project = await pipeline;
+        return c.json({ project }, 201);
+      }
+
+      // Background mode only: GET /api/projects/:id for stills/voiceover/clips/ready.
+      void pipeline;
+      return c.json({ project }, 202);
+    } catch (error) {
+      if (error instanceof BriefValidationError || error instanceof ZodError) {
+        return c.json(
+          {
+            error: "invalid_brief",
+            message:
+              error instanceof BriefValidationError
+                ? error.message
+                : "Brief failed validation.",
+          },
+          400,
+        );
+      }
+      throw error;
+    }
+  });
+
+  app.get("/api/projects", async (c) => {
+    const projects = await store.listProjects();
+    return c.json({ projects });
+  });
+
+  app.get("/api/projects/:id", async (c) => {
+    const id = c.req.param("id");
+    if (!id.startsWith("prj_")) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const project = await store.getProject(id as `prj_${string}`);
+    if (!project) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    return c.json({ project });
+  });
+
+  app.patch("/api/projects/:id", async (c) => {
+    const id = c.req.param("id");
+    if (!id.startsWith("prj_")) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const body = await c.req.json();
+    const displayTitle =
+      typeof body.displayTitle === "string" ? body.displayTitle.trim() : "";
+    if (!displayTitle) {
+      return c.json(
+        { error: "invalid_title", message: "displayTitle is required." },
+        400,
+      );
+    }
+    try {
+      const project = await store.updateProject(id as `prj_${string}`, {
+        displayTitle,
+      });
+      return c.json({ project });
+    } catch {
+      return c.json({ error: "not_found" }, 404);
+    }
+  });
+
+  app.get("/api/projects/:id/assets/*", async (c) => {
+    const id = c.req.param("id");
+    if (!id.startsWith("prj_")) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const assetPath = c.req.path.replace(`/api/projects/${id}/`, "");
+    if (!assetPath.startsWith("assets/") || assetPath.includes("..")) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const file = Bun.file(
+      `${store.projectDir(id as `prj_${string}`)}/${assetPath}`,
+    );
+    if (!(await file.exists())) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    return new Response(file);
+  });
+
+  const staticDir = options.staticDir;
+  if (staticDir && existsSync(staticDir)) {
+    app.use("/*", serveStatic({ root: staticDir }));
+    app.get("*", async (c, next) => {
+      await next();
+      if (c.res.status === 404) {
+        const index = Bun.file(resolve(staticDir, "index.html"));
+        if (await index.exists()) {
+          return c.html(await index.text());
+        }
+      }
+    });
+  }
+
+  return app;
+}

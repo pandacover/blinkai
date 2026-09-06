@@ -1,0 +1,39 @@
+{
+  "title": "Neon Alley Shortcut",
+  "logline": "A courier cuts through a rainy neon alley and makes it to the last train.",
+  "durationTarget": "15s",
+  "aspectRatio": "16:9",
+  "includeClips": false,
+  "shots": [
+    {
+      "id": "shot_01",
+      "stillPrompt": "Wide cinematic still of a rainy neon alley at night, wet asphalt reflections, courier silhouette in yellow jacket, moody teal and magenta light",
+      "voiceover": "Tonight the long way would miss the train.",
+      "durationSeconds": 3
+    },
+    {
+      "id": "shot_02",
+      "stillPrompt": "Medium shot of worn sneakers splashing through puddles, neon signs streaking overhead, motion implied by rain streaks",
+      "voiceover": "So she took the alley the maps pretend isn't there.",
+      "durationSeconds": 3
+    },
+    {
+      "id": "shot_03",
+      "stillPrompt": "Close-up of a glowing package strapped to a messenger bag, raindrops beading on plastic wrap, neon bokeh behind",
+      "voiceover": "One package. One last stop.",
+      "durationSeconds": 3
+    },
+    {
+      "id": "shot_04",
+      "stillPrompt": "Courier vaulting a low fence into a brighter station plaza, train doors open in the distance, rain turning to mist under sodium lights",
+      "voiceover": "And just enough seconds left to slip through the doors.",
+      "durationSeconds": 3
+    },
+    {
+      "id": "shot_05",
+      "stillPrompt": "Inside the train car looking out at the fading alley lights, courier catching her breath, quiet after the run",
+      "voiceover": "",
+      "durationSeconds": 3
+    }
+  ]
+}
