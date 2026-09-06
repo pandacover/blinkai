@@ -1,7 +1,7 @@
 # 04 — Local Project persistence mechanism
 
 Type: grilling
-Status: open
+Status: claimed
 
 ## Question
 
