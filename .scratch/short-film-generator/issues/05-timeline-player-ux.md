@@ -1,7 +1,7 @@
 # 05 — Timeline Player minimal UX
 
 Type: prototype
-Status: open
+Status: claimed
 Blocked by: 03
 
 ## Question
