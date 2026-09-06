@@ -7,7 +7,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 ## Notes
 
 - Domain: Blinkai short-film generation. Read `CONTEXT.md` before naming anything. Use `/grilling` + `/domain-modeling` on grilling tickets; `/prototype` on prototype tickets; `/research` on research tickets.
-- Stack intent (not locked): TypeScript, Bun, OpenRouter.
+- Stack (locked via [08](./issues/08-bun-ts-app-topology.md)): TypeScript, Bun, Hono API, Vite React SPA, OpenRouter; single package. ADR: [`docs/adr/0001-bun-ts-app-topology.md`](../../docs/adr/0001-bun-ts-app-topology.md).
 - **Plan, don't do.** This map produces decisions, not product code. After the map clears: `/to-spec` → `/to-tickets` → `/implement`.
 - Standing research: [OpenRouter media capabilities](../../docs/research/openrouter-media-capabilities.md) (LLM, images, async video, TTS confirmed 2026-09-05).
 - Charting preferences already locked into Destination (not separate tickets): to-spec handoff; solo tool; 15–30s target; Brief = free text + optional controls; Timeline Player (no V1 MP4); local Project save; Stills+Voiceover default, Clips optional/off.
@@ -20,6 +20,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 - [04 — Local Project persistence mechanism](./issues/04-local-project-persistence.md): Bun filesystem under `BLINKAI_DATA_DIR` (default `<app-root>/data`)/`projects/prj_<ulid>/` with brief, film-plan, assembly, and asset folders; autosave after expensive stages; one Project = one Run.
 - [06 — Default OpenRouter model roster](./issues/06-default-model-roster.md): Film Plan `deepseek/deepseek-v4-flash-0731`; Stills `bytedance-seed/seedream-5-0-pro`; Voiceover `hexgrad/kokoro-82m` (omit `voice`); Clips `google/veo-3.1-fast`; no fallbacks — fail loudly.
 - [07 — Clip behavior when Include Clips is on](./issues/07-optional-clip-enablement.md): mix Clip/Still-only Shots; optional per-shot `clipPrompt`; always Still + muted Clip; audio-wins window; cut long Clips / hold last frame on short; no V1 per-shot override. Example: [`film-plan.include-clips.example.json`](./assets/film-plan.include-clips.example.json).
+- [08 — Bun and TypeScript app topology](./issues/08-bun-ts-app-topology.md): single package; Hono on Bun (API + static); Vite React SPA; `src/server` / `src/client` / `src/shared`. ADR: [`docs/adr/0001-bun-ts-app-topology.md`](../../docs/adr/0001-bun-ts-app-topology.md).
 - [09 — In-browser Assembly without MP4 export](./issues/09-in-browser-assembly-research.md): Web Audio master clock + rAF still cuts (+ muted `playsinline` video for optional Clips); user-gesture gated; no MP4 encode for V1 playback. Write-up: [`docs/research/in-browser-assembly.md`](../../docs/research/in-browser-assembly.md).
 
 ## Not yet specified
