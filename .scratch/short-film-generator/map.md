@@ -19,6 +19,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 - [03 — Film Plan schema for stills-and-voiceover shorts](./issues/03-film-plan-schema.md): title + logline + echoed durationTarget/aspectRatio/includeClips + ordered Shots (`id`, `stillPrompt`, per-shot `voiceover`, soft `durationSeconds` with audio-wins, optional `clipPrompt` when clips on). Example: [`film-plan.example.json`](./assets/film-plan.example.json).
 - [04 — Local Project persistence mechanism](./issues/04-local-project-persistence.md): Bun filesystem under `BLINKAI_DATA_DIR` (default `<app-root>/data`)/`projects/prj_<ulid>/` with brief, film-plan, assembly, and asset folders; autosave after expensive stages; one Project = one Run.
 - [06 — Default OpenRouter model roster](./issues/06-default-model-roster.md): Film Plan `deepseek/deepseek-v4-flash-0731`; Stills `bytedance-seed/seedream-5-0-pro`; Voiceover `hexgrad/kokoro-82m` (omit `voice`); Clips `google/veo-3.1-fast`; no fallbacks — fail loudly.
+- [07 — Clip behavior when Include Clips is on](./issues/07-optional-clip-enablement.md): mix Clip/Still-only Shots; optional per-shot `clipPrompt`; always Still + muted Clip; audio-wins window; cut long Clips / hold last frame on short; no V1 per-shot override. Example: [`film-plan.include-clips.example.json`](./assets/film-plan.include-clips.example.json).
 - [09 — In-browser Assembly without MP4 export](./issues/09-in-browser-assembly-research.md): Web Audio master clock + rAF still cuts (+ muted `playsinline` video for optional Clips); user-gesture gated; no MP4 encode for V1 playback. Write-up: [`docs/research/in-browser-assembly.md`](../../docs/research/in-browser-assembly.md).
 
 ## Not yet specified
@@ -26,6 +27,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 - Spend / cost caps and user-visible OpenRouter usage during a Run
 - Failure UX when image or TTS generation fails mid-Run (partial Assembly?)
 - Character consistency across Stills (seed / reference image strategy)
+- Whether Clip generation uses the Shot’s Still as an image-to-video reference
 - Licensing / content-policy posture for generated media
 
 ## Out of scope

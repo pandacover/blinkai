@@ -45,7 +45,7 @@ An optional short-text Brief control naming the look of Stills; when blank, it i
 _Avoid_: aesthetic, art style (as a separate product noun)
 
 **Include Clips**:
-The Brief toggle that opts a Run into Clip generation; off by default.
+The Brief toggle that allows the Film Plan to assign Clips to some Shots; off by default (does not require a Clip on every Shot).
 _Avoid_: enable video, motion toggle
 
 **Still**:

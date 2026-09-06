@@ -28,7 +28,7 @@ Canonical V1 Film Plan:
 - `stillPrompt`: full image prompt (planner folds Mood/Visual Style when present)
 - `voiceover`: string; may be empty — if empty, `durationSeconds` is required
 - `durationSeconds`: optional soft floor; when Voiceover TTS audio is longer, **audio wins**
-- `clipPrompt`: present only when `includeClips` is true (selection/mix rules → [07 — Clip behavior when Include Clips is on](./07-optional-clip-enablement.md))
+- `clipPrompt`: only when `includeClips` is true, and **optional per Shot** (omit → Still-only); mix + timing → [07 — Clip behavior when Include Clips is on](./07-optional-clip-enablement.md)
 
 No schema-enforced shot-count min/max; planner uses soft guidance (~4–6 for 15s, ~6–10 for 30s).
 
