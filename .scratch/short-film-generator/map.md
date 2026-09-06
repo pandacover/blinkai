@@ -18,6 +18,7 @@ A cleared decision map ready for `/to-spec`: a solo TypeScript/Bun webapp where 
 - [02 — OpenRouter API key supply and storage](./issues/02-openrouter-api-key.md): gitignored `.env` (`OPENROUTER_API_KEY`); Bun server only; hard-fail if missing; accept local filesystem read risk; no in-app paste/settings in V1.
 - [03 — Film Plan schema for stills-and-voiceover shorts](./issues/03-film-plan-schema.md): title + logline + echoed durationTarget/aspectRatio/includeClips + ordered Shots (`id`, `stillPrompt`, per-shot `voiceover`, soft `durationSeconds` with audio-wins, optional `clipPrompt` when clips on). Example: [`film-plan.example.json`](./assets/film-plan.example.json).
 - [09 — In-browser Assembly without MP4 export](./issues/09-in-browser-assembly-research.md): Web Audio master clock + rAF still cuts (+ muted `playsinline` video for optional Clips); user-gesture gated; no MP4 encode for V1 playback. Write-up: [`docs/research/in-browser-assembly.md`](../../docs/research/in-browser-assembly.md).
+- [05 — Timeline Player minimal UX](./issues/05-timeline-player-ux.md): Beat-aligned Film stage (play/pause, Shot beat rail + scrub, current Shot chip, VO caption); cinema chrome is secondary polish; reject slideshow-only and cinema-only. Prototype: [`prototypes/timeline-player-ux.html`](./prototypes/timeline-player-ux.html).
 
 ## Not yet specified
 
