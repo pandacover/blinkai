@@ -154,8 +154,17 @@ export function App() {
       setSubmitError(body.message ?? "Could not open Project");
       return;
     }
-    setProject(body.project as ProjectView);
-    setRenameValue((body.project as ProjectView).displayTitle);
+    const opened = body.project as ProjectView;
+    setProject(opened);
+    setRenameValue(opened.displayTitle);
+    if (opened.status !== "ready" || !opened.assembly) {
+      setSubmitError(
+        `Project ${opened.id} is not ready (status=${opened.status}). Start a new Run — incomplete Projects are not polled.`,
+      );
+      setView("library");
+      return;
+    }
+    setSubmitError(null);
     setView("player");
   }
 

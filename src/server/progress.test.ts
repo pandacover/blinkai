@@ -38,7 +38,7 @@ describe("Run API progress", () => {
       store: createProjectStore(config.dataDir),
     });
 
-    const created = await app.request("/api/runs", {
+    const created = await app.request("/api/runs?async=1", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -64,4 +64,32 @@ describe("Run API progress", () => {
     expect(ready.status).toBe("ready");
     expect(ready.assembly.beats.length).toBeGreaterThan(0);
   });
+
+  test("default Run waits for Assembly (no client poll required)", async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), "blinkai-wait-default-"));
+    const config = loadServerConfig({
+      OPENROUTER_API_KEY: "sk-or-test",
+      BLINKAI_DATA_DIR: dataDir,
+    });
+    const app = createApp(config, {
+      openRouter: createFakeOpenRouterPort(),
+      store: createProjectStore(config.dataDir),
+    });
+
+    const response = await app.request("/api/runs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        idea: "Sync alley finish",
+        durationTarget: "15s",
+        aspectRatio: "16:9",
+        includeClips: false,
+      }),
+    });
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.project.status).toBe("ready");
+    expect(body.project.assembly?.beats?.length).toBeGreaterThan(0);
+  });
+
 });

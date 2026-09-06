@@ -41,9 +41,12 @@ export function createApp(
   app.post("/api/runs", async (c) => {
     try {
       const brief = parseBrief(await c.req.json());
-      const wait = c.req.query("wait") === "1";
+      // Default: wait for Assembly (sync). Opt into background with ?async=1.
+      // ?wait=1 remains supported for older clients.
+      const asyncRun =
+        c.req.query("async") === "1" && c.req.query("wait") !== "1";
       const filmPlan = await openRouter.planFilm({ brief });
-      // Autosave after Film Plan — client can poll real status from here.
+      // Autosave after Film Plan (async clients may poll status from here).
       let project = await store.createProject({
         brief,
         filmPlan,
@@ -61,12 +64,12 @@ export function createApp(
         throw error;
       });
 
-      if (wait) {
+      if (!asyncRun) {
         project = await pipeline;
         return c.json({ project }, 201);
       }
 
-      // Fire-and-continue: UI polls GET /api/projects/:id for stills/voiceover/clips/ready.
+      // Background mode only: GET /api/projects/:id for stills/voiceover/clips/ready.
       void pipeline;
       return c.json({ project }, 202);
     } catch (error) {

@@ -87,7 +87,10 @@ export function createProjectStore(dataDir: string): ProjectStore {
         displayTitle: meta.displayTitle,
         createdAt: meta.createdAt,
         updatedAt: meta.updatedAt,
-        status: meta.status ?? "ready",
+        // Incomplete on-disk Projects must not look "ready" (avoids UI/poll confusion).
+        status:
+          meta.status ??
+          (assembly ? "ready" : filmPlan ? "planning" : "failed"),
         brief,
         filmPlan,
         assembly,
@@ -137,7 +140,18 @@ export function createProjectStore(dataDir: string): ProjectStore {
           const meta = JSON.parse(
             await readFile(join(projectsDir, entry.name, "meta.json"), "utf8"),
           ) as ProjectMeta;
-          metas.push(meta);
+          const record = await readRecord(entry.name as ProjectId);
+          if (record) {
+            metas.push({
+              id: record.id,
+              displayTitle: record.displayTitle,
+              createdAt: record.createdAt,
+              updatedAt: record.updatedAt,
+              status: record.status,
+            });
+          } else {
+            metas.push(meta);
+          }
         } catch (error) {
           throw new Error(
             `Project ${entry.name} is missing or corrupt: ${
