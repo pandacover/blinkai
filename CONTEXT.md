@@ -65,7 +65,7 @@ One end-to-end attempt from Brief through Film Plan and media to Assembly.
 _Avoid_: job, session, generation (when meaning the whole pipeline)
 
 **Project**:
-A locally saved Run (Brief, Film Plan, assets, and assembled Film state) that survives reloads.
+A locally saved Run (Brief, Film Plan, assets, and Assembly state) that survives reloads; one Project holds exactly one Run.
 _Avoid_: document, workspace, file set
 
 **Voiceover**:
